@@ -1,3 +1,9 @@
+# Executable
+ft_ping
+
+# Clion
+.idea
+
 # Prerequisites
 *.d
 
