@@ -1,10 +1,25 @@
-## Available functions
+# Available functions
 
-### getpid
++ [getpid](#getpid)
++ [getuid](#getuid)
++ [getaddrinfo](#getaddrinfo)
++ [gettimeofday](#gettimeofday)
++ [inet\_ntop](#inet\_ntop)
++ [inet\_pton](#inet\_pton)
++ [exit](#exit)
++ [signal](#signal)
++ [alarm](#alarm)
++ [setsockopt](#setsockopt)
++ [recvmsg](#recvmsg)
++ [sendto](#sendto)
++ [socket](#socket)
+
+## getpid
 
 ```c
 #include <unistd.h>
 #include <sys/types.h>
+
 pid_t getpid(void)
 ```
 
@@ -12,41 +27,44 @@ returns parent or calling process ID, guaranteed to be unique and is useful for
 constructing temporary file names; always successful, no return values is
 reserved to indicate an error.
 
-### getuid
+## getuid
 
 ```c
 #include <unistd.h>
 #include <sys/types.h>
+
 uid_t getpid(void);
 ```
 returns the real user ID of the calling process (who has invoked the program);
 always successful, no return values is reserved to indicate an error.
 
-### getaddrinfo
+## getaddrinfo
 
 ```c
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+
 int getaddrinfo(const char *node, const char *service,
 				   const struct addrinfo *hints,
 				   struct addrinfo **res);
 ```
 
-### gettimeofday
+## gettimeofday
 
 ```c
 #include <sys/time.h>
+
 int gettimeofday(struct timeval *tv, struct timezone *tz);
 ```
 
-The tv argument is a struct timeval (as specified in <sys/time.h>):
+The tv argument is a struct timeval (as specified in `<sys/time.h>`):
 
 ```c
-   struct timeval {
-	   time_t      tv_sec;     /* seconds */
-	   suseconds_t tv_usec;    /* microseconds */
-   };
+struct timeval {
+   time_t      tv_sec;     /* seconds */
+   suseconds_t tv_usec;    /* microseconds */
+};
 ```
 
 gives the number of seconds and microseconds since Epoch.
@@ -54,18 +72,19 @@ gives the number of seconds and microseconds since Epoch.
 The tz argument is a struct timezone:
 
 ```c
-   struct timezone {
-	   int tz_minuteswest;     /* minutes west of Greenwich */
-	   int tz_dsttime;         /* type of DST correction */
-   };
+struct timezone {
+   int tz_minuteswest;     /* minutes west of Greenwich */
+   int tz_dsttime;         /* type of DST correction */
+};
 ```
+
 If either `tv` or `tz` is NULL, the corresponding structure is not set or
 returned. The use of the timezone structure is obsolete; the tz argument
 should normally be specified as NULL.
 
 Return 0 for success and -1 for failure.
 
-### inet\_ntop
+## inet\_ntop
 
 ```c
 #include <arpa/inet.h>
@@ -91,7 +110,7 @@ network address format for this address. The buffer dst must be at least
 
 Returns non-null `dst` on success, null indicating failure.
 
-### inet\_pton
+## inet\_pton
 
 ```c
 #include <arpa/inet.h>
@@ -110,8 +129,8 @@ Returns 1 on success, 0 if `src` does not contain a character string
 representing a valid network address in the specified address family,
 -1 if `af` does not contain  valid address family.
 
-### exit
-### signal
+## exit
+## signal
 
 ```c
 #include <signal.h>
@@ -120,9 +139,9 @@ sighandler_t signal(int signum, sighandler_t handler);
 ```
 
 [to be continued]
-### alarm
+## alarm
 
-```
+```c
 #include <unistd.h>
 
 unsigned int alarm(unsigned int seconds);
@@ -136,7 +155,7 @@ alarm() returns the number of seconds remaining until any previously
 scheduled alarm was due to be delivered, or zero if there was no
 previously scheduled alarm.
 
-### setsockopt
+## setsockopt
 
 ```c
 #include <sys/socket.h>
@@ -147,7 +166,7 @@ int setsockopt(int socket, int level, int option_name,
 
 [to be continued]
 
-### recvmsg
+## recvmsg
 
 ```c
 #include <sys/types.h>
@@ -158,19 +177,19 @@ ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
 
 [to be continued]
 
-### sendto
+## sendto
 
 ```c
 #include <sys/types.h>
 #include <sys/socket.h>
 
 ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
-                      const struct sockaddr *dest_addr, socklen_t addrlen);
+					  const struct sockaddr *dest_addr, socklen_t addrlen);
 ```
 
 [to be continued]
 
-### socket
+## socket
 
 ```c
 #include <sys/types.h>
