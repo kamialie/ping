@@ -2,23 +2,9 @@
 
 Recode of `ping` command line tool.
 
-## Available functions
+[Available functions](./docs/functions/readme.md)
 
-+ getpid
-+ getuid
-+ getaddrinfo
-+ gettimeofday
-+ inet\_ntop
-+ inet\_pton
-+ exit
-+ signal
-+ alarm
-+ setsockopt
-+ recvmsg
-+ sendto
-+ socket
-
-Must be permorned in Linux VM (kernel > 3.14)
+Must be performed in Linux VM (kernel > 3.14)
 
 ## Tasks
 
