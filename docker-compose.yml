@@ -4,5 +4,8 @@ services:
   debian:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile
+    container_name: ping_box
+    volumes:
+    - ./:/app/ping
     tty: true

@@ -8,7 +8,7 @@ SRC_DIR = src
 
 OBJ_DIR = obj
 
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra #-Werror
 
 all: $(NAME)
 

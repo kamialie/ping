@@ -1,4 +1,4 @@
-FROM debian
+FROM debian:9
 
 RUN apt-get update && \
-	apt-get install -y iputils-ping man-db less netbase
+	apt-get install -y make gcc

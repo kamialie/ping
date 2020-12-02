@@ -4,8 +4,8 @@
 + [getuid](#getuid)
 + [getaddrinfo](#getaddrinfo)
 + [gettimeofday](#gettimeofday)
-+ [inet\_ntop](#inet\_ntop)
-+ [inet\_pton](#inet\_pton)
++ [inet\_ntop](#inet_ntop)
++ [inet\_pton](#inet_pton)
 + [exit](#exit)
 + [signal](#signal)
 + [alarm](#alarm)
@@ -13,6 +13,8 @@
 + [recvmsg](#recvmsg)
 + [sendto](#sendto)
 + [socket](#socket)
+
+[debian-man](https://manpages.debian.org/stretch/manpages/man-pages.7.en.html)
 
 ## getpid
 
@@ -84,7 +86,7 @@ should normally be specified as NULL.
 
 Return 0 for success and -1 for failure.
 
-## inet\_ntop
+## inet_ntop
 
 ```c
 #include <arpa/inet.h>
@@ -100,17 +102,17 @@ The caller specifies the number of bytes available in this buffer
 in the argument `size`.
 
 The following address families are currently supported:
-+ `AF_INET` - `src` points to a struct in\_addr (in network byte order) which
++ `AF_INET` - `src` points to a struct in_addr (in network byte order) which
 is converted to an IPv4 network address in the dotted-decimal format,
 `ddd.ddd.ddd.ddd`. The buffer dst must be at least `INET_ADDRSTRLEN` bytes long.
-+ `AF_INET6` - `src` points to a struct in6\_addr (in network byte order) which
++ `AF_INET6` - `src` points to a struct in6_addr (in network byte order) which
 is converted to a representation of this address in the most appropriate IPv6
 network address format for this address. The buffer dst must be at least
 `INET6_ADDRSTRLEN` bytes long.
 
 Returns non-null `dst` on success, null indicating failure.
 
-## inet\_pton
+## inet_pton
 
 ```c
 #include <arpa/inet.h>
@@ -185,9 +187,23 @@ ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
 
 ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
 					  const struct sockaddr *dest_addr, socklen_t addrlen);
-```
+struct sockaddr_in {
+    sa_family_t    sin_family; /* address family: AF_INET */
+    in_port_t      sin_port;   /* port in network byte order */
+    struct in_addr sin_addr;   /* internet address */
+};
 
-[to be continued]
+ /* Internet address. */
+struct in_addr {
+    uint32_t       s_addr;     /* address in network byte order */
+};
+```
+[man7.org](https://www.man7.org/linux/man-pages/man2/sendto.2.html)
+
+If `sendto()` is used on a connection-mode (`SOCK_STREAM`, `SOCK_SEQPACKET`) socket, the arguments `dest_addr` and
+`addrlen` are ignored (and the error `EISCONN` may be returned when they are not NULL and 0), and the error `ENOTCONN`
+is returned when the socket was not actually connected. Otherwise, the address of the target is given by `dest_addr`
+with `addrlen` specifying its size.
 
 ## socket
 
