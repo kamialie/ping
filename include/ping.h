@@ -4,6 +4,8 @@
 // TEMPRORARY
 #include <stdio.h>
 //END
+#include <stdlib.h> // u_int8_t
+
 
 typedef struct s_icmp_hdr {
     u_int8_t    type; // message type, 0 - echo reply, 8 - echo request
@@ -15,11 +17,19 @@ typedef struct s_icmp_hdr {
 
 typedef struct s_icmp_data {
     u_int32_t   content;
+    u_int32_t   other;
+    u_int32_t   third;
 }   t_icmp_data;
 
+// 96 bit, 12 bytes
 typedef struct s_icmp_pack {
     t_icmp_hdr  header;
     t_icmp_data data;
 }   t_icmp_pack;
+
+void    print_memory(void *memory, unsigned int len);
+void    fill_icmp_packet(t_icmp_pack *packet);
+
+void    receive_packet(int sfd);
 
 #endif
