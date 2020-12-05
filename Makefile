@@ -1,6 +1,6 @@
 NAME = ft_ping
 
-SRC = ft_ping.c packet.c utils.c
+SRC = main.c socket.c packet.c destination.c utils.c
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
 

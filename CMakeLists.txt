@@ -7,4 +7,4 @@ include_directories(include)
 
 add_executable(ping
         include/ping.h
-        src/ft_ping.c)
+        src/main.c)

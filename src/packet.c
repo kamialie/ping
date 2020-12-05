@@ -10,12 +10,13 @@ void fill_icmp_packet(t_icmp_pack *packet) {
 
     packet->header.type = ICMP_ECHO;
     packet->header.code = 0;
-    packet->header.id = htons(15);
+    packet->header.id = htons(0);
     packet->header.seq = htons(0);
     //packet->data.content = 0;
     packet->header.chksum = 0;
-    packet->header.chksum = htons(0x6e87);//htons(~(ICMP_ECHO << 8));// htons(checksum((uint16_t *)packet, sizeof(*packet)));
     memcpy(&(packet->data), "hi!", strlen("hi!"));
+
+    packet->header.chksum = htons(compute_checksum((u_int16_t *)packet, sizeof(*packet)));//htons(0x6e87);//htons(~(ICMP_ECHO << 8));// htons(checksum((uint16_t *)packet, sizeof(*packet)));
 
     printf("size of packet - %ld\n", sizeof(*packet));
     printf("icmp message type - %d\n", packet->header.type);

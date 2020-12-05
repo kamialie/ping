@@ -5,6 +5,7 @@
 #include <stdio.h>
 //END
 #include <stdlib.h> // u_int8_t
+#include <netinet/in.h> // protocol macros
 
 
 typedef struct s_icmp_hdr {
@@ -27,9 +28,19 @@ typedef struct s_icmp_pack {
     t_icmp_data data;
 }   t_icmp_pack;
 
-void    print_memory(void *memory, unsigned int len);
-void    fill_icmp_packet(t_icmp_pack *packet);
+typedef struct s_info {
+    int sfd;
+    t_icmp_pack icmp_packet;
+    struct sockaddr_in  sin;
+}   t_info;
 
+int     get_socket();
+void    fill_icmp_packet(t_icmp_pack *packet);
+u_int16_t compute_checksum(u_int16_t *addr, int count);
+void    prepare_destination(struct sockaddr_in *sin);
+void    send_packet(int sfd, t_icmp_pack *packet, struct sockaddr_in *sin);
 void    receive_packet(int sfd);
+
+void    print_memory(void *memory, unsigned int len);
 
 #endif
