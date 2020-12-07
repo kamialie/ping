@@ -3,8 +3,12 @@
 #include <string.h>
 #include <sys/time.h>
 #include <arpa/inet.h>
+#include <signal.h>
 
 void run_requests(t_icmp_pack *icmp_packet, t_info *info);
+void sig_handler(int signo);
+
+volatile sig_atomic_t g_v = 1;
 
 // TODO switch info.dst to addrinfo to support both IPv4 and IPv6
 int	main(int argv, char *args[])
@@ -56,20 +60,40 @@ void run_requests(t_icmp_pack *icmp_packet, t_info *info) {
     msg.msghdr.msg_iovlen = 1;
 
     g_rt_stats.pkg_sent = 0;
-    while (g_rt_stats.pkg_sent < 3) {
-        update_icmp_packet(icmp_packet);
-        send_packet(info->sfd, icmp_packet, &info->dst);
-        //    receive_packet(info->sfd);
-        if ((bytes = recvmsg(info->sfd, &msg.msghdr, 0)) < 0) {
-            perror("revmsg() error");
-            exit(-1);
-        }
-//        else {
-//            printf("received - %ld\n", bytes);
-//        }
+    if (signal(SIGALRM, sig_handler) == SIG_ERR)
+        exit(1);
+    if (signal(SIGINT, sig_handler) == SIG_ERR)
+        exit(1);
+    while (1) {
+        if (g_v == 1)
+        {
+            update_icmp_packet(icmp_packet);
+            send_packet(info->sfd, icmp_packet, &info->dst);
+            //    receive_packet(info->sfd);
+            if ((bytes = recvmsg(info->sfd, &msg.msghdr, 0)) < 0) {
+                perror("revmsg() error");
+                exit(-1);
+            }
+    //        else {
+    //            printf("received - %ld\n", bytes);
+    //        }
 
-        print_trip_stats(info->dst_char, info->ttl, DEFAULT_ICMP_DATA + sizeof(struct s_icmp_hdr), icmp_packet);
-        sleep(1);
+            print_trip_stats(info->dst_char, info->ttl, DEFAULT_ICMP_DATA + sizeof(struct s_icmp_hdr), icmp_packet);
+            alarm(1);
+            g_v = 0;
+        }
+        else if (g_v == 2)
+        {
+            print_execution_summary(info->dst_char);
+            exit(1);
+        }
     }
-    print_execution_summary(info->dst_char);
+}
+
+void sig_handler(int signo)
+{
+    if (signo == SIGALRM)
+        g_v = 1;
+    else if (signo == SIGINT)
+        g_v = 2;
 }
