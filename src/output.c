@@ -7,7 +7,8 @@ void print_usage() {
 }
 
 void print_trip_stats(char *dst, int ttl, int icmp_size, t_icmp_pack *icmp_packet) {
-    double      time;
+    double      time_milli_s;
+    long        time_micro_s;
     t_icmp_hdr  hdr;
 
 
@@ -21,9 +22,11 @@ void print_trip_stats(char *dst, int ttl, int icmp_size, t_icmp_pack *icmp_packe
 //    printf("icmp message id - %d\n", ntohs(hdr.id));
 
     hdr = icmp_packet->header;
-    time = get_trip_time(icmp_packet->tv);
-    update_rt_stats(time);
-    printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3g ms\n", icmp_size, dst, ntohs(hdr.seq), ttl, time);
+    time_micro_s = get_trip_time(icmp_packet->tv);
+    time_milli_s = time_micro_s / 1000.0;
+    update_rt_stats(time_micro_s);
+    printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%#.3g ms\n",
+           icmp_size, dst, ntohs(hdr.seq), ttl, time_milli_s);
 }
 
 void print_execution_summary(char *dst) {
@@ -37,7 +40,7 @@ void print_execution_summary(char *dst) {
     //sqrt(smean-(mean*mean)
 
     double percent_loss;
-    double total_time = 0;
+    long total_time;
 
     total_time = get_trip_time(g_rt_stats.start_time);
     if (g_rt_stats.pkg_received == g_rt_stats.pkg_sent)
@@ -45,10 +48,10 @@ void print_execution_summary(char *dst) {
     else
         percent_loss = (double) g_rt_stats.pkg_received / g_rt_stats.pkg_sent * 100;
     printf("\n--- %s ping statistics ---\n", dst);
-    printf("%d packets transmitted, %d received, %.0f%% packet loss, time %.3gms\n",
-           g_rt_stats.pkg_sent, g_rt_stats.pkg_received, percent_loss, total_time);
+    printf("%d packets transmitted, %d received, %.0f%% packet loss, time %#.5gms\n",
+           g_rt_stats.pkg_sent, g_rt_stats.pkg_received, percent_loss, total_time / 1000.0);
     printf("rtt min/avg/max/mdev = %.5g/%.5g/%.5g/%.5g ms\n",
-           g_rt_stats.min, g_rt_stats.max, g_rt_stats.sum / g_rt_stats.pkg_received,0.0);
+           g_rt_stats.min / 1000.0, g_rt_stats.max / 1000.0, g_rt_stats.sum / 1000.0 / g_rt_stats.pkg_received,0.0);
 }
 
 /*

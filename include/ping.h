@@ -48,18 +48,14 @@ typedef struct s_msg_in {
 }   t_msg_in;
 
 typedef struct s_rt_stats {
-    double min;
-    double max;
-    double sum;
-    double sum2;
+    long min;
+    long max;
+    long sum;
+    long sum2;
     u_int16_t pkg_sent;
     u_int16_t pkg_received;
     struct timeval start_time;
 }   t_rt_stats;
-
-typedef struct s_stats {
-
-}   t_stats;
 
 typedef struct s_info {
     int sfd;
@@ -86,7 +82,7 @@ void print_execution_summary(char *dst);
 
 void    print_memory(void *memory, unsigned int len);
 
-double get_trip_time(struct timeval tv_begin);
-void update_rt_stats(double time);
+long get_trip_time(struct timeval tv_begin);
+void update_rt_stats(long time);
 
 #endif

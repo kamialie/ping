@@ -32,33 +32,3 @@ void send_packet(int sfd, t_icmp_pack *packet, struct sockaddr_in *sin) {
 //    }
     g_rt_stats.pkg_sent++;
 }
-
-//void receive_packet(int sfd) {
-//    struct msghdr msg;
-//    struct iovec io;
-//    struct sockaddr_in rec_addr;
-//    char buf[512];
-//    ssize_t bytes;
-//
-//    memset(buf, 0, sizeof(buf));
-//    memset(&msg, 0, sizeof(msg));
-//    memset(&rec_addr, 0, sizeof(rec_addr));
-//
-//    io.iov_base = buf;
-//    io.iov_len = sizeof(buf);
-//
-//    msg.msg_name = &rec_addr;
-//    msg.msg_namelen = sizeof(rec_addr);
-//    msg.msg_control = buf + 256;
-//    msg.msg_controllen = 256;
-//    msg.msg_iov = &io;
-//    msg.msg_iovlen = 1;
-//
-//    if ((bytes = recvmsg(sfd, &msg, 0)) < 0 )
-//    {
-//        perror("revmsg() error");
-//        exit(-1);
-//    } else {
-//        printf("received - %ld\n", bytes);
-//    }
-//}
