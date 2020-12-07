@@ -1,4 +1,13 @@
-void getaddress(void) {
+#include <stdio.h>
+#include <sys/socket.h>
+#include <netinet/in.h> // protocol macros
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <string.h>
+#include <stdlib.h>
+
+struct sockaddr_in get_address(char *input) {
+    struct sockaddr_in *ipv4f;
     struct addrinfo hints, *res, *p;
     char ipstr[INET6_ADDRSTRLEN];
     int status;
@@ -9,7 +18,7 @@ void getaddress(void) {
 
     if ((status = getaddrinfo(input, NULL, &hints, &res)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
-        return 2;
+        exit(2);
     }
 
     for(p = res;p != NULL; p = p->ai_next) {
@@ -22,6 +31,7 @@ void getaddress(void) {
             struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
             addr = &(ipv4->sin_addr);
             ipver = "IPv4";
+            ipv4f = ipv4;
         } else { // IPv6
             struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
             addr = &(ipv6->sin6_addr);
@@ -32,4 +42,5 @@ void getaddress(void) {
         inet_ntop(p->ai_family, addr, ipstr, sizeof ipstr);
         printf("  %s: %s\n", ipver, ipstr);
     }
+    return *ipv4f;
 }
