@@ -2,24 +2,23 @@
 
 #include "ping.h"
 
-void print_usage() {
-
+void print_usage()
+{
+    fprintf(stdout, "Usage: ping destination");
 }
 
-void print_trip_stats(char *dst, int ttl, int icmp_size, t_icmp_pack *icmp_packet) {
+void print_execution_intro(char *dst, t_info *info)
+{
+    printf("PING %s (%s) %d(%ld) bytes of data.\n",
+           dst, info->dst_char, info->icmp_data_size,
+           info->icmp_data_size + sizeof(t_icmp_hdr) + sizeof(t_ip_pack));
+}
+
+void print_trip_stats(char *dst, int ttl, int icmp_size, t_icmp_pack *icmp_packet)
+{
     double      time_milli_s;
     long        time_micro_s;
     t_icmp_hdr  hdr;
-
-
-//    t_icmp_pack *icmp_in;
-//    icmp_in = (t_icmp_pack *)(20 + buf);
-
-//    printf("size of message - %ld\n", msg.msg_iov[0].iov_len);
-//    printf("incoming address - %d\n", ntohl(*((int*)&rec_addr.sin_addr)));
-//    printf("icmp message type - %d\n", hdr.type);
-//    printf("icmp message seq - %d\n", ntohs(hdr.seq));
-//    printf("icmp message id - %d\n", ntohs(hdr.id));
 
     hdr = icmp_packet->header;
     time_micro_s = get_trip_time(icmp_packet->tv);
@@ -29,20 +28,19 @@ void print_trip_stats(char *dst, int ttl, int icmp_size, t_icmp_pack *icmp_packe
            icmp_size, dst, ntohs(hdr.seq), ttl, time_milli_s);
 }
 
-void print_execution_summary(char *dst) {
-
-    // TODO rtt
-    //--- 192.168.1.1 ping statistics ---
-    //1 packets transmitted, 1 received, 0% packet loss, time 0ms
-    //rtt min/avg/max/mdev = 11.162/11.162/11.162/0.000 ms
-
+int print_execution_summary(char *dst)
+{
     // TODO smean
     //sqrt(smean-(mean*mean)
 
+    int status;
     double percent_loss;
     long total_time;
 
+    status = 0;
     total_time = get_trip_time(g_rt_stats.start_time);
+    if (g_rt_stats.pkg_received == 0)
+        status = 1;
     if (g_rt_stats.pkg_received == g_rt_stats.pkg_sent)
         percent_loss = 0;
     else
@@ -52,12 +50,14 @@ void print_execution_summary(char *dst) {
            g_rt_stats.pkg_sent, g_rt_stats.pkg_received, percent_loss, total_time / 1000.0);
     printf("rtt min/avg/max/mdev = %.5g/%.5g/%.5g/%.5g ms\n",
            g_rt_stats.min / 1000.0, g_rt_stats.max / 1000.0, g_rt_stats.sum / 1000.0 / g_rt_stats.pkg_received,0.0);
+    return status;
 }
 
 /*
  * for debugging
  */
-void    print_memory(void *memory, unsigned int len) {
+void    print_memory(void *memory, unsigned int len)
+{
     unsigned int  i;
     unsigned char *buf;
 

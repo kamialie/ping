@@ -1,9 +1,9 @@
-#include "ping.h"
 #include <unistd.h>
 #include <string.h>
 #include <sys/time.h>
 #include <arpa/inet.h>
 #include <signal.h>
+#include "ping.h"
 
 void run_requests(t_icmp_pack *icmp_packet, t_info *info);
 void sig_handler(int signo);
@@ -16,37 +16,30 @@ int	main(int argv, char *args[])
     t_info info;
     t_icmp_pack *icmp_packet;
 
-    (void)argv;
     g_rt_stats.min = DEFAULT_TIMEOUT * 1000; // max waiting time
     if (gettimeofday(&g_rt_stats.start_time, NULL) != 0) {
         perror("gettimeofday() error");
-        exit(1);
+        exit(2);
     }
-
     info.pid = getpid();
     info.sfd = get_socket();
     info.ttl = DEFAULT_TTL;
-//    info.dest_char = "192.168.1.1";
-    info.dst = get_address(args[1]);
+    info.icmp_data_size = DEFAULT_ICMP_DATA;
+    info.dst = get_address(args[argv - 1]);
     inet_ntop(AF_INET, &(info.dst.sin_addr), info.dst_char, sizeof info.dst_char);
     icmp_packet = get_icmp_packet(info.pid);
-//    prepare_destination(&info.dst);
-
+    print_execution_intro(args[argv - 1], &info);
+    g_rt_stats.pkg_sent = 0;
+    if (signal(SIGALRM, sig_handler) == SIG_ERR)
+        exit(2);
+    if (signal(SIGINT, sig_handler) == SIG_ERR)
+        exit(2);
     run_requests(icmp_packet, &info);
-    close(info.sfd);
-
-    printf("\n");
-    printf("size of ip packet - %ld\n", sizeof(t_ip_pack));
-    printf("size of tv - %ld\n", sizeof(struct timeval));
-    printf("size of icmp header - %ld\n", sizeof(t_icmp_hdr));
-    printf("size of icmp packet - %ld\n", sizeof(t_icmp_pack));
-    printf("size of int - %ld\n", sizeof(int));
-
     return (0);
 }
 
-void run_requests(t_icmp_pack *icmp_packet, t_info *info) {
-    ssize_t bytes;
+void run_requests(t_icmp_pack *icmp_packet, t_info *info)
+{
     t_msg_in msg;
 
     memset(&msg, 0, sizeof(msg));
@@ -59,33 +52,24 @@ void run_requests(t_icmp_pack *icmp_packet, t_info *info) {
     msg.msghdr.msg_iov = &msg.io;
     msg.msghdr.msg_iovlen = 1;
 
-    g_rt_stats.pkg_sent = 0;
-    if (signal(SIGALRM, sig_handler) == SIG_ERR)
-        exit(1);
-    if (signal(SIGINT, sig_handler) == SIG_ERR)
-        exit(1);
+    // TODO multicast ping
     while (1) {
         if (g_v == 1)
         {
             update_icmp_packet(icmp_packet);
             send_packet(info->sfd, icmp_packet, &info->dst);
-            //    receive_packet(info->sfd);
-            if ((bytes = recvmsg(info->sfd, &msg.msghdr, 0)) < 0) {
+            if (recvmsg(info->sfd, &msg.msghdr, 0) < 0) {
                 perror("revmsg() error");
                 exit(-1);
             }
-    //        else {
-    //            printf("received - %ld\n", bytes);
-    //        }
-
             print_trip_stats(info->dst_char, info->ttl, DEFAULT_ICMP_DATA + sizeof(struct s_icmp_hdr), icmp_packet);
             alarm(1);
             g_v = 0;
         }
         else if (g_v == 2)
         {
-            print_execution_summary(info->dst_char);
-            exit(1);
+            close(info->sfd);
+            exit(print_execution_summary(info->dst_char));
         }
     }
 }

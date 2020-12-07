@@ -8,7 +8,8 @@
 
 #include "ping.h"
 
-t_icmp_pack *get_icmp_packet(pid_t pid) {
+t_icmp_pack *get_icmp_packet(pid_t pid)
+{
     size_t len;
     t_icmp_pack *p;
 
@@ -22,17 +23,11 @@ t_icmp_pack *get_icmp_packet(pid_t pid) {
     p->header.type = ICMP_ECHO;
     p->header.code = 0;
     p->header.id = htons(pid);
-
-//    printf("size of packet - %ld\n", sizeof(*p));
-//    printf("icmp message type - %d\n", p->header.type);
-//    printf("icmp message seq - %d\n", p->header.seq);
-//    printf("icmp message chksum - %d\n", p->header.chksum);
-//    print_memory(p, sizeof(*p));
-
     return p;
 }
 
-void update_icmp_packet(t_icmp_pack *p) {
+void update_icmp_packet(t_icmp_pack *p)
+{
     p->header.seq = htons(g_rt_stats.pkg_sent);
     if (gettimeofday(&p->tv, NULL) != 0) {
         perror("gettimeofday() error");

@@ -7,9 +7,10 @@
 #include <stdlib.h> // u_int8_t
 #include <netinet/in.h> // protocol macros
 
-#define DEFAULT_TTL 37
 #define DEFAULT_ICMP_DATA 56
+
 #define DEFAULT_TIMEOUT 1 // in seconds
+#define DEFAULT_TTL 37
 
 // 64 bit, 8 bytes
 typedef struct s_icmp_hdr {
@@ -26,18 +27,18 @@ typedef struct s_icmp_pack {
     struct timeval  tv;
 }   t_icmp_pack;
 
+// 20 bytes
 typedef struct s_ip_pack {
-    unsigned char         iph_ihl:4, ip_ver:4;
-    unsigned char         iph_tos;
-    unsigned short int    iph_len;
-    unsigned short int    iph_ident;
-    unsigned char         iph_flags;
-    unsigned short int    iph_offset;
-    unsigned char         iph_ttl;
-    unsigned char         iph_protocol;
-    unsigned short int    iph_chksum;
-    unsigned int          iph_source;
-    unsigned int          iph_dest;
+    u_int8_t    iph_ihl:4, ip_ver:4;
+    u_int8_t    iph_tos;
+    u_int16_t   iph_len;
+    u_int16_t   iph_ident;
+    u_int16_t   iph_flags:3, iph_offset:13;
+    u_int8_t    iph_ttl;
+    u_int8_t    iph_protocol;
+    u_int16_t   iph_chksum;
+    u_int32_t   iph_source;
+    u_int32_t   iph_dest;
 }   t_ip_pack;
 
 typedef struct s_msg_in {
@@ -60,7 +61,7 @@ typedef struct s_rt_stats {
 typedef struct s_info {
     int sfd;
     int ttl;
-    int icmp_size;
+    int icmp_data_size;
     pid_t pid;
     char dst_char[INET_ADDRSTRLEN];
     struct sockaddr_in  dst;
@@ -77,9 +78,10 @@ u_int16_t compute_checksum(u_int16_t *addr, int count);
 void    prepare_destination(struct sockaddr_in *sin);
 void    send_packet(int sfd, t_icmp_pack *packet, struct sockaddr_in *sin);
 void    receive_packet(int sfd);
-void    print_trip_stats(char *dest, int ttl, int icmp_size, t_icmp_pack *packet);
-void print_execution_summary(char *dst);
 
+void print_execution_intro(char *dst, t_info *info);
+void    print_trip_stats(char *dest, int ttl, int icmp_size, t_icmp_pack *packet);
+int print_execution_summary(char *dst);
 void    print_memory(void *memory, unsigned int len);
 
 long get_trip_time(struct timeval tv_begin);

@@ -2,7 +2,8 @@
 
 #include <arpa/inet.h>
 
-u_int16_t compute_checksum(u_int16_t *addr, int count) {
+u_int16_t compute_checksum(u_int16_t *addr, int count)
+{
     register u_int32_t  sum = 0;
 
     while (count > 1) {
