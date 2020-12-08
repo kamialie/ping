@@ -12,6 +12,8 @@
 #define DEFAULT_TIMEOUT 1 // in seconds
 #define DEFAULT_TTL 37
 
+#define H_FLAG 0x1
+
 // 64 bit, 8 bytes
 typedef struct s_icmp_hdr {
     u_int8_t    type; // message type, 0 - echo reply, 8 - echo request
@@ -59,6 +61,7 @@ typedef struct s_rt_stats {
 }   t_rt_stats;
 
 typedef struct s_info {
+    int flags;
     int sfd;
     int ttl;
     int icmp_data_size;
@@ -69,16 +72,17 @@ typedef struct s_info {
 
 t_rt_stats g_rt_stats;
 
+int options(int argv, char *args[], t_info *info);
 struct sockaddr_in get_address(char *input);
 int     get_socket();
 t_icmp_pack *get_icmp_packet(pid_t pid);
 void update_icmp_packet(t_icmp_pack *p);
 void    fill_icmp_packet(t_icmp_pack *packet);
-u_int16_t compute_checksum(u_int16_t *addr, int count);
 void    prepare_destination(struct sockaddr_in *sin);
 void    send_packet(int sfd, t_icmp_pack *packet, struct sockaddr_in *sin);
 void    receive_packet(int sfd);
 
+void print_usage(void);
 void print_execution_intro(char *dst, t_info *info);
 void    print_trip_stats(char *dest, int ttl, int icmp_size, t_icmp_pack *packet);
 int print_execution_summary(char *dst);
@@ -86,5 +90,10 @@ void    print_memory(void *memory, unsigned int len);
 
 long get_trip_time(struct timeval tv_begin);
 void update_rt_stats(long time);
+
+u_int16_t compute_checksum(u_int16_t *addr, int count);
+u_int16_t ft_htons(u_int16_t x);
+int get_value(const char *str);
+
 
 #endif

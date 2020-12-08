@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include "ping.h"
+#include "lib.h"
 
 void run_requests(t_icmp_pack *icmp_packet, t_info *info);
 void sig_handler(int signo);
@@ -13,9 +14,15 @@ volatile sig_atomic_t g_v = 1;
 // TODO switch info.dst to addrinfo to support both IPv4 and IPv6
 int	main(int argv, char *args[])
 {
+    int i;
     t_info info;
     t_icmp_pack *icmp_packet;
 
+    ft_memset(&info, 0, sizeof(t_info));
+//    i = options(argv, args, &info);
+//    printf("flags - %x, ttl - %d\n", info.flags, info.ttl);
+//    return 0;
+//    ft_htons(0x66DF);
     g_rt_stats.min = DEFAULT_TIMEOUT * 1000; // max waiting time
     if (gettimeofday(&g_rt_stats.start_time, NULL) != 0) {
         perror("gettimeofday() error");
@@ -42,7 +49,7 @@ void run_requests(t_icmp_pack *icmp_packet, t_info *info)
 {
     t_msg_in msg;
 
-    memset(&msg, 0, sizeof(msg));
+    ft_memset(&msg, 0, sizeof(msg));
     msg.io.iov_base = msg.buf;
     msg.io.iov_len = 256; //TODO macro
     msg.msghdr.msg_name = &msg.rec_addr;

@@ -4,7 +4,15 @@
 
 void print_usage()
 {
-    fprintf(stdout, "Usage: ping destination");
+    fprintf(stdout, "Usage: ping [-h] [-t ttl] destination\n");
+    exit(2);
+}
+
+void print_error(int code)
+{
+    if (code == 1)
+        fprintf(stdout, "ft_ping: bad number of packets to transmit.\n");
+    exit(2);
 }
 
 void print_execution_intro(char *dst, t_info *info)

@@ -4,6 +4,7 @@ ft_ping
 # Clion
 .idea
 cmake-build-debug
+venv
 
 # Prerequisites
 *.d

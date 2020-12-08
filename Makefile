@@ -1,6 +1,6 @@
 NAME = ft_ping
 
-SRC = main.c socket.c address.c packet.c destination.c output.c stats.c utils.c
+SRC = main.c lib.c options.c socket.c address.c packet.c destination.c output.c stats.c utils.c
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
 
@@ -15,7 +15,7 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	gcc -o $(NAME) $(OBJ)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c include/ping.h $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c include/ping.h include/lib.h $(OBJ_DIR)
 	gcc $(FLAGS) -g -c -I include -o $@ $<
 
 $(OBJ_DIR):

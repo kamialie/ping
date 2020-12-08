@@ -20,9 +20,7 @@ int get_socket()
 }
 
 void send_packet(int sfd, t_icmp_pack *packet, struct sockaddr_in *sin) {
-    ssize_t bytes;
-
-    if ((bytes = sendto(sfd, packet, sizeof(*packet), 0, (struct sockaddr *)sin, sizeof(*sin))) < 0)
+    if (sendto(sfd, packet, sizeof(*packet), 0, (struct sockaddr *)sin, sizeof(*sin)) < 0)
     {
         perror("sendto() error");
         exit(2);
