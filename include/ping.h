@@ -13,6 +13,8 @@
 #define DEFAULT_TTL 37
 
 #define H_FLAG 0x1
+#define T_FLAG 0x2
+#define B_FLAG 0x4
 
 // 64 bit, 8 bytes
 typedef struct s_icmp_hdr {
@@ -30,7 +32,7 @@ typedef struct s_icmp_pack {
 }   t_icmp_pack;
 
 // 20 bytes
-typedef struct s_ip_pack {
+typedef struct s_ip_hdr {
     u_int8_t    iph_ihl:4, ip_ver:4;
     u_int8_t    iph_tos;
     u_int16_t   iph_len;
@@ -41,7 +43,7 @@ typedef struct s_ip_pack {
     u_int16_t   iph_chksum;
     u_int32_t   iph_source;
     u_int32_t   iph_dest;
-}   t_ip_pack;
+}   t_ip_hdr;
 
 typedef struct s_msg_in {
     struct sockaddr_in rec_addr;
@@ -55,8 +57,10 @@ typedef struct s_rt_stats {
     long max;
     long sum;
     long sum2;
+    u_int16_t seq;
     u_int16_t pkg_sent;
     u_int16_t pkg_received;
+    u_int16_t errors;
     struct timeval start_time;
 }   t_rt_stats;
 
@@ -67,33 +71,40 @@ typedef struct s_info {
     int icmp_data_size;
     pid_t pid;
     char dst_char[INET_ADDRSTRLEN];
-    struct sockaddr_in  dst;
+    struct sockaddr_in  address_info;
+    // TODO decide if need to be malloced
+    t_rt_stats *rt_stats;
+    t_icmp_pack *icmp_packet;
 }   t_info;
 
-t_rt_stats g_rt_stats;
+t_info g_info;
 
-int options(int argv, char *args[], t_info *info);
+int options(int argv, char *args[]);
 struct sockaddr_in get_address(char *input);
 int     get_socket();
-t_icmp_pack *get_icmp_packet(pid_t pid);
-void update_icmp_packet(t_icmp_pack *p);
-void    fill_icmp_packet(t_icmp_pack *packet);
-void    prepare_destination(struct sockaddr_in *sin);
+t_icmp_pack *get_icmp_packet();
+void update_icmp_packet(int seq, t_icmp_pack *p);
 void    send_packet(int sfd, t_icmp_pack *packet, struct sockaddr_in *sin);
-void    receive_packet(int sfd);
+int     verify_received_packet(t_msg_in *msg);
 
+/*
+ * output
+ */
 void print_usage(void);
-void print_execution_intro(char *dst, t_info *info);
-void    print_trip_stats(char *dest, int ttl, int icmp_size, t_icmp_pack *packet);
-int print_execution_summary(char *dst);
+void print_execution_intro(char *dst);
+void print_trip_stats(t_icmp_pack *icmp_in, char *address, int ttl);
+void print_trip_error(t_icmp_pack *icmp_in, char *address);
+int print_execution_summary(void);
 void    print_memory(void *memory, unsigned int len);
 
 long get_trip_time(struct timeval tv_begin);
 void update_rt_stats(long time);
 
+/*
+ * utils
+ */
 u_int16_t compute_checksum(u_int16_t *addr, int count);
 u_int16_t ft_htons(u_int16_t x);
-int get_value(const char *str);
 
 
 #endif

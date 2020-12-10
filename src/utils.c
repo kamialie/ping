@@ -29,13 +29,3 @@ u_int16_t ft_htons (u_int16_t x)
     return x;
 #endif
 }
-
-int get_value(const char *str)
-{
-    int value;
-
-    value = ft_atoi(str);
-    if (value < 0 || value > 100000)
-        print_usage();
-    return value;
-}

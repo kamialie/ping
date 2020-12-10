@@ -2,19 +2,19 @@
 #include "lib.h"
 #include <string.h>
 
-void set_single_option(char flag, t_info *info);
-void set_options_with_arguments(char flag, char *str, t_info *info);
+void set_single_option(char flag);
+void set_options_with_arguments(char flag, char *str);
 
-int options(int argv, char *args[], t_info *info)
+int options(int argv, char *args[])
 {
     int i;
     char *str;
-    char *single_options = "hv";
+    char *single_options = "bhv";
     char *options_with_arg = "ct";
 
 //    if (argv < 2)
 //        print_usage();
-    printf("argv - %d i - %d\n", argv, i);
+//    printf("argv - %d i - %d\n", argv, i);
     i = 1;
     while (i < argv)
     {
@@ -22,27 +22,26 @@ int options(int argv, char *args[], t_info *info)
         str = args[i];
         if (*str++ == '-')
         {
-            if (strlen(str) == 1)
+            if (ft_strchr(single_options, *str) != NULL)
             {
-                if (ft_strchr(single_options, *str) != NULL)
-                    set_single_option(*str, info);
-                else if (ft_strchr(options_with_arg, *str) != NULL)
-                {
-                    if (*(str + 1) != '\0')
-                        set_options_with_arguments(*str, str + 1, info);
-                    else
-                    {
-                        printf("one - %d, two - %d\n", i + 1, argv - 1);
-                        if (i + 2 > argv - 1)
-                            print_usage();
-                        set_options_with_arguments(*str, args[++i], info);
-                    }
-                }
+                if (*(str + 1) != '\0')
+                    printf("2\n");//print_usage();
+                set_single_option(*str);
+            }
+            else if (ft_strchr(options_with_arg, *str) != NULL)
+            {
+                if (*(str + 1) != '\0')
+                    set_options_with_arguments(*str, str + 1);
                 else
-                    printf("3\n");//print_usage();
+                {
+                    printf("one - %d, two - %d\n", i + 1, argv - 1);
+                    if (i + 2 > argv - 1)
+                        print_usage();
+                    set_options_with_arguments(*str, args[++i]);
+                }
             }
             else
-                printf("4\n");//print_usage();
+                printf("3\n");//print_usage();
         }
         else
             return 1;
@@ -52,14 +51,14 @@ int options(int argv, char *args[], t_info *info)
     return 1;
 }
 
-void set_single_option(char flag, t_info *info)
+void set_single_option(char flag)
 {
     printf("flag - %c\n", flag);
     if (flag == 'h')
-        info->flags |= H_FLAG;
+        g_info.flags |= H_FLAG;
 }
 
-void set_options_with_arguments(char flag, char *str, t_info *info)
+void set_options_with_arguments(char flag, char *str)
 {
     int value;
 
@@ -71,8 +70,7 @@ void set_options_with_arguments(char flag, char *str, t_info *info)
         printf("6\n");//print_usage();
     if (flag == 't')
     {
-        if (value == 0) // maybe ttl set will error this
-            printf("7\n");//print_usage();
-        info->ttl = value;
+        g_info.flags |= T_FLAG;
+        g_info.ttl = value;
     }
 }

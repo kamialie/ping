@@ -18,12 +18,14 @@ long get_trip_time(struct timeval tv_begin) {
 }
 
 void update_rt_stats(long time) {
+    t_rt_stats *rt_stats;
 
-    g_rt_stats.pkg_received += 1;
-    if (time < g_rt_stats.min)
-        g_rt_stats.min = time;
-    if (time > g_rt_stats.max)
-        g_rt_stats.max = time;
-    g_rt_stats.sum += time;
-    g_rt_stats.sum2 += time * time;
+    rt_stats = g_info.rt_stats;
+//    rt_stats->pkg_received += 1;
+    if (time < rt_stats->min)
+        rt_stats->min = time;
+    if (time > rt_stats->max)
+        rt_stats->max = time;
+    rt_stats->sum += time;
+    rt_stats->sum2 += time * time;
 }

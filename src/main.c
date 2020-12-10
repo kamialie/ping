@@ -6,47 +6,55 @@
 #include "ping.h"
 #include "lib.h"
 
-void run_requests(t_icmp_pack *icmp_packet, t_info *info);
+void run_requests(int sfd);
 void sig_handler(int signo);
+void prepare_info(char *destination);
 
-volatile sig_atomic_t g_v = 1;
+//volatile sig_atomic_t g_v = 1;
 
-// TODO switch info.dst to addrinfo to support both IPv4 and IPv6
+// TODO switch info.address_info to addrinfo to support both IPv4 and IPv6
 int	main(int argv, char *args[])
 {
-    int i;
-    t_info info;
-    t_icmp_pack *icmp_packet;
-
-    ft_memset(&info, 0, sizeof(t_info));
-//    i = options(argv, args, &info);
-//    printf("flags - %x, ttl - %d\n", info.flags, info.ttl);
+    int i = options(argv, args);
+    printf("flags - %x, ttl - %d\n", g_info.flags, g_info.ttl);
 //    return 0;
 //    ft_htons(0x66DF);
-    g_rt_stats.min = DEFAULT_TIMEOUT * 1000; // max waiting time
-    if (gettimeofday(&g_rt_stats.start_time, NULL) != 0) {
-        perror("gettimeofday() error");
-        exit(2);
-    }
-    info.pid = getpid();
-    info.sfd = get_socket();
-    info.ttl = DEFAULT_TTL;
-    info.icmp_data_size = DEFAULT_ICMP_DATA;
-    info.dst = get_address(args[argv - 1]);
-    inet_ntop(AF_INET, &(info.dst.sin_addr), info.dst_char, sizeof info.dst_char);
-    icmp_packet = get_icmp_packet(info.pid);
-    print_execution_intro(args[argv - 1], &info);
-    g_rt_stats.pkg_sent = 0;
+    prepare_info(args[argv - 1]);
+    //TODO decide between malloc and in-place
     if (signal(SIGALRM, sig_handler) == SIG_ERR)
         exit(2);
     if (signal(SIGINT, sig_handler) == SIG_ERR)
         exit(2);
-    run_requests(icmp_packet, &info);
+    print_execution_intro(args[argv - 1]);
+    run_requests(g_info.sfd);
     return (0);
 }
 
-void run_requests(t_icmp_pack *icmp_packet, t_info *info)
+void prepare_info(char *destination)
 {
+    g_info.pid = getpid();
+    g_info.sfd = get_socket();
+    if (!(g_info.flags & T_FLAG))
+        g_info.ttl = DEFAULT_TTL;
+    //TODO check if input already an address
+    g_info.address_info = get_address(destination);
+    inet_ntop(AF_INET, &(g_info.address_info.sin_addr), g_info.dst_char, sizeof(g_info.dst_char));
+//    g_info.icmp_data_size = DEFAULT_ICMP_DATA;
+    //TODO decide between malloc and in-place
+    g_info.icmp_packet = get_icmp_packet();
+    g_info.rt_stats = (t_rt_stats *)malloc(sizeof(t_rt_stats));
+    ft_memset(g_info.rt_stats, 0, sizeof(*g_info.rt_stats));
+    if (gettimeofday(&g_info.rt_stats->start_time, NULL) != 0) {
+        perror("gettimeofday() error");
+        exit(2);
+    }
+    g_info.rt_stats->min = DEFAULT_TIMEOUT * 1000; // max waiting time
+    g_info.rt_stats->seq = 1;
+}
+
+void run_requests(int sfd)
+{
+    int status;
     t_msg_in msg;
 
     ft_memset(&msg, 0, sizeof(msg));
@@ -59,32 +67,36 @@ void run_requests(t_icmp_pack *icmp_packet, t_info *info)
     msg.msghdr.msg_iov = &msg.io;
     msg.msghdr.msg_iovlen = 1;
 
-    // TODO multicast ping
-    while (1) {
-        if (g_v == 1)
-        {
-            update_icmp_packet(icmp_packet);
-            send_packet(info->sfd, icmp_packet, &info->dst);
-            if (recvmsg(info->sfd, &msg.msghdr, 0) < 0) {
-                perror("revmsg() error");
-                exit(-1);
-            }
-            print_trip_stats(info->dst_char, info->ttl, DEFAULT_ICMP_DATA + sizeof(struct s_icmp_hdr), icmp_packet);
-            alarm(1);
-            g_v = 0;
+    sig_handler(SIGALRM);
+    while (1)
+    {
+        if (recvmsg(sfd, &msg.msghdr, 0) < 0) {
+            perror("revmsg() error");
+            exit(-1);
         }
-        else if (g_v == 2)
-        {
-            close(info->sfd);
-            exit(print_execution_summary(info->dst_char));
-        }
+        // TODO verify incoming traffic
+        status = verify_received_packet(&msg);
+//        print_trip_stats(status, &msg.rec_addr);
+//        else
+//            print_trip_error()
+        // TODO think about changing the size of icmp packet
     }
 }
 
 void sig_handler(int signo)
 {
     if (signo == SIGALRM)
-        g_v = 1;
+    {
+        update_icmp_packet(g_info.rt_stats->seq, g_info.icmp_packet);
+        send_packet(g_info.sfd, g_info.icmp_packet, &g_info.address_info);
+        //TODO get rid of duplicating seq and pack_set?
+        g_info.rt_stats->seq++;
+        alarm(1);
+    }
     else if (signo == SIGINT)
-        g_v = 2;
+    {
+        close(g_info.sfd);
+        free(g_info.icmp_packet);
+        exit(print_execution_summary());
+    }
 }
