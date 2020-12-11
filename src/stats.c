@@ -8,10 +8,8 @@ long get_trip_time(struct timeval tv_begin) {
     long      time;
     struct timeval tv_end;
 
-    if (gettimeofday(&tv_end, NULL) != 0) {
-        perror("gettimeofday() error");
-        exit(1);
-    }
+    if (gettimeofday(&tv_end, NULL) != 0)
+		exit_with_error(GETTIMEOFDAY_ERROR);
     time = 1000000 * (tv_end.tv_sec - tv_begin.tv_sec);
     time += tv_end.tv_usec - tv_begin.tv_usec;
     return time;
@@ -21,7 +19,6 @@ void update_rt_stats(long time) {
     t_rt_stats *rt_stats;
 
     rt_stats = g_info.rt_stats;
-//    rt_stats->pkg_received += 1;
     if (time < rt_stats->min)
         rt_stats->min = time;
     if (time > rt_stats->max)

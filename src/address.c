@@ -24,7 +24,6 @@ struct sockaddr_in get_address(char *input) {
 
     if ((status = getaddrinfo(input, 0, &hints, &res)) != 0)
     {
-        printf("KEK\n");
         fprintf(stderr, "ft_ping: %s: %s\n", input, gai_strerror(status));
         exit(2);
     }
@@ -36,7 +35,7 @@ struct sockaddr_in get_address(char *input) {
         if (p->ai_family == AF_INET) // IPv4
         {
 //            printf("canin flag - %x\n", AI_CANONNAME);
-            printf("canon - %s\n", p->ai_canonname);
+//            printf("canon - %s\n", p->ai_canonname);
             return *(struct sockaddr_in *)p->ai_addr;
         }
     }

@@ -1,6 +1,5 @@
-#include <sys/time.h>
-#include <arpa/inet.h>
 #include <netinet/ip_icmp.h>
+#include <stdio.h>
 
 #include "ping.h"
 
@@ -10,11 +9,23 @@ void print_usage()
     exit(2);
 }
 
-void print_error(int code)
+void exit_with_error(int code)
 {
-    if (code == 1)
-        fprintf(stdout, "ft_ping: bad number of packets to transmit.\n");
-    exit(2);
+	if (code == 1)
+        fprintf(stderr, "ft_ping: bad number of packets to transmit.\n");
+	else if (code == RECVMSG_ERROR)
+		fprintf(stderr, "ft_ping: recvmsg() error.\n");
+	else if (code == GETTIMEOFDAY_ERROR)
+		fprintf(stderr, "ft_ping: gettimeofday() error.\n");
+	else if (code == SIGNAL_ERROR)
+		fprintf(stderr, "ft_ping: signal() error.\n");
+	else if (code == MALLOC_ERROR)
+		fprintf(stderr, "ft_ping: malloc() error.\n");
+	else if (code == SOCKET_ERROR)
+		fprintf(stderr, "ft_ping: socket() error.\n");
+	else if (code == SENDTO_ERROR)
+		fprintf(stderr, "ft_ping: sendto() error.\n");
+	exit(2);
 }
 
 void print_execution_intro(char *dst)
@@ -38,7 +49,7 @@ void print_trip_stats(t_icmp_pack *icmp_in, char *address, int ttl)
     update_rt_stats(time_micro_s);
 //        hdr = g_info.icmp_packet->header;
     printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%#.3g ms\n",
-           DEFAULT_ICMP_DATA + (int)sizeof(t_icmp_hdr), address, ntohs(icmp_in->header.seq), ttl, time_milli_s);
+           DEFAULT_ICMP_DATA + (int)sizeof(t_icmp_hdr), address, ft_ntohs(icmp_in->header.seq), ttl, time_milli_s);
 }
 
 void print_trip_error(t_icmp_pack *icmp_in, char *address)
@@ -50,7 +61,7 @@ void print_trip_error(t_icmp_pack *icmp_in, char *address)
         error_message = "Time to live exceeded";
     else
         error_message = "Unknown error";
-    printf("From %s icmp_seq=%d %s\n", address, ntohs(icmp_in->header.seq), error_message);
+    printf("From %s icmp_seq=%d %s\n", address, ft_ntohs(icmp_in->header.seq), error_message);
 }
 
 int print_execution_summary(void)
@@ -101,7 +112,8 @@ void    print_memory(void *memory, unsigned int len)
     i = 0;
     buf = (unsigned char *)memory;
     printf("0x0000: ");
-    while (i < len) {
+    while (i < len)
+    {
         printf("%02x", buf[i]);
         i++;
         if (i % 16 == 0)

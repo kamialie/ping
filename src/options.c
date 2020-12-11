@@ -1,6 +1,7 @@
+#include <string.h>
+#include <stdio.h>
 #include "ping.h"
 #include "lib.h"
-#include <string.h>
 
 void set_single_option(char flag);
 void set_options_with_arguments(char flag, char *str);
@@ -18,7 +19,6 @@ int options(int argv, char *args[])
     i = 1;
     while (i < argv)
     {
-        printf("hey\n");
         str = args[i];
         if (*str++ == '-')
         {
@@ -55,7 +55,7 @@ void set_single_option(char flag)
 {
     printf("flag - %c\n", flag);
     if (flag == 'h')
-        g_info.flags |= H_FLAG;
+        g_info.options |= H_FLAG;
 }
 
 void set_options_with_arguments(char flag, char *str)
@@ -70,7 +70,7 @@ void set_options_with_arguments(char flag, char *str)
         printf("6\n");//print_usage();
     if (flag == 't')
     {
-        g_info.flags |= T_FLAG;
+        g_info.options |= T_FLAG;
         g_info.ttl = value;
     }
 }
