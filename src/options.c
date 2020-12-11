@@ -3,8 +3,8 @@
 #include "ping.h"
 #include "lib.h"
 
-void set_single_option(char flag);
-void set_options_with_arguments(char flag, char *str);
+void set_single_option(char option);
+void set_options_with_arguments(char option, char *str);
 
 int options(int argv, char *args[])
 {
@@ -34,7 +34,6 @@ int options(int argv, char *args[])
                     set_options_with_arguments(*str, str + 1);
                 else
                 {
-                    printf("one - %d, two - %d\n", i + 1, argv - 1);
                     if (i + 2 > argv - 1)
                         print_usage();
                     set_options_with_arguments(*str, args[++i]);
@@ -51,26 +50,35 @@ int options(int argv, char *args[])
     return 1;
 }
 
-void set_single_option(char flag)
+void set_single_option(char option)
 {
-    printf("flag - %c\n", flag);
-    if (flag == 'h')
+    printf("option - %c\n", option);
+    if (option == 'h')
         g_info.options |= H_FLAG;
 }
 
-void set_options_with_arguments(char flag, char *str)
+void set_options_with_arguments(char option, char *str)
 {
     int value;
 
-    printf("str - %s\n", str);
-    printf("flag with options\n");
+//    printf("str - %s\n", str);
+//    printf("option with options\n");
     value = ft_atoi(str);
-    printf("value - %d\n", value);
-    if (value < 0 || value > 100000)
-        printf("6\n");//print_usage();
-    if (flag == 't')
+//    printf("value - %d\n", value);
+//    if (value < 0 || value > 100000)
+//        printf("6\n");//print_usage();
+    if (option == 't')
     {
-        g_info.options |= T_FLAG;
+		if (value <= 0 || value > 255)
+			exit_with_error(TTL_OPTION_ERROR);
+		g_info.options |= T_FLAG;
         g_info.ttl = value;
     }
+    else if (option == 'c')
+	{
+    	if (value <= 0)
+			exit_with_error(COUNT_OPTION_ERROR);
+		g_info.options |= C_FLAG;
+		g_info.count = value;
+	}
 }

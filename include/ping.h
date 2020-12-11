@@ -14,14 +14,17 @@
 
 # define H_FLAG 0x1
 # define T_FLAG 0x2
-# define B_FLAG 0x4
+# define C_FLAG 0x4
 
-# define RECVMSG_ERROR 2
-# define GETTIMEOFDAY_ERROR 3
-# define SIGNAL_ERROR 4
-# define MALLOC_ERROR 5
-# define SOCKET_ERROR 6
-# define SENDTO_ERROR 7
+# define COUNT_OPTION_ERROR 1
+# define TTL_OPTION_ERROR 2
+# define RECVMSG_ERROR 3
+# define GETTIMEOFDAY_ERROR 4
+# define SIGNAL_ERROR 5
+# define MALLOC_ERROR 6
+# define SOCKET_ERROR 7
+# define SENDTO_ERROR 8
+# define SETSOCKOPT_ERROR 9
 
 /*
 ** 8 bytes
@@ -88,6 +91,7 @@ typedef struct		s_info {
 	int					options;
 	int					sfd;
 	int					ttl;
+	int					count;
 	int					icmp_data_size;
 	pid_t				pid;
 	char				dst_char[INET_ADDRSTRLEN];

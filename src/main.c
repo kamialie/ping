@@ -48,7 +48,7 @@ void	prepare_info(char *destination)
 	ft_memset(g_info.rt_stats, 0, sizeof(*g_info.rt_stats));
 	if (gettimeofday(&g_info.rt_stats->start_time, NULL) != 0)
 		exit_with_error(GETTIMEOFDAY_ERROR);
-	g_info.rt_stats->min = DEFAULT_TIMEOUT * 1000; // max waiting time
+	g_info.rt_stats->min = DEFAULT_TIMEOUT * 1000000; // max waiting time
 	g_info.rt_stats->seq = 1;
 }
 
@@ -71,11 +71,14 @@ void	run_requests(int sfd)
 	while (1)
 	{
 		if (recvmsg(sfd, &msg.msghdr, 0) < 0)
-		{
 			exit_with_error(RECVMSG_ERROR);
-			exit(2);
-		}
 		verify_received_packet(&msg);
+		if (g_info.options & C_FLAG && g_info.rt_stats->pkg_sent == g_info.count)
+		{
+			close(g_info.sfd);
+			free(g_info.icmp_packet);
+			exit(print_execution_summary());
+		}
 		// TODO think about changing the size of icmp packet
 	}
 }

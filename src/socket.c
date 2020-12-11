@@ -23,10 +23,7 @@ int		get_socket(void)
 	if (g_info.options & T_FLAG)
 		if (setsockopt(sfd, IPPROTO_IP, IP_TTL, &g_info.ttl,
 				sizeof(g_info.ttl)) < 0)
-		{
-			fprintf(stderr, "ft_ping: can't set unicast time-to-live: Invalid argument");
-			exit(-1);
-		}
+			exit_with_error(SETSOCKOPT_ERROR);
 	return (sfd);
 }
 

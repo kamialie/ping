@@ -11,8 +11,10 @@ void print_usage()
 
 void exit_with_error(int code)
 {
-	if (code == 1)
-        fprintf(stderr, "ft_ping: bad number of packets to transmit.\n");
+	if (code == COUNT_OPTION_ERROR)
+		fprintf(stderr, "ft_ping: bad number of packets to transmit.\n");
+	if (code == TTL_OPTION_ERROR)
+        fprintf(stderr, "ft_ping: ttl out of range.\n");
 	else if (code == RECVMSG_ERROR)
 		fprintf(stderr, "ft_ping: recvmsg() error.\n");
 	else if (code == GETTIMEOFDAY_ERROR)
@@ -25,6 +27,8 @@ void exit_with_error(int code)
 		fprintf(stderr, "ft_ping: socket() error.\n");
 	else if (code == SENDTO_ERROR)
 		fprintf(stderr, "ft_ping: sendto() error.\n");
+	else if (code == SETSOCKOPT_ERROR)
+		fprintf(stderr, "ft_ping: setsockopt() error");
 	exit(2);
 }
 
@@ -56,7 +60,7 @@ void print_trip_error(t_icmp_pack *icmp_in, char *address)
 {
     char *error_message;
 
-    printf("error - %d\n", icmp_in->header.type);
+//    printf("error - %d\n", icmp_in->header.type);
     if (icmp_in->header.type == ICMP_TIMXCEED)
         error_message = "Time to live exceeded";
     else
