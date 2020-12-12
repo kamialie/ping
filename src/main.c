@@ -34,11 +34,11 @@ int		main(int argv, char *args[])
 
 void	prepare_info(char *destination)
 {
-	g_info.pid = getpid();
-	g_info.sfd = get_socket();
+//	g_info.pid = getpid();
+//	g_info.sfd = get_socket();
 	if (!(g_info.options & T_FLAG))
 		g_info.ttl = DEFAULT_TTL;
-	//TODO check if input already an address
+//	//TODO check if input already an address
 	g_info.address_info = get_address(destination);
 	inet_ntop(AF_INET, &(g_info.address_info.sin_addr), g_info.dst_char, sizeof(g_info.dst_char));
 //    g_info.icmp_data_size = DEFAULT_ICMP_DATA;

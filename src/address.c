@@ -28,14 +28,36 @@ struct sockaddr_in get_address(char *input) {
         exit(2);
     }
 
+#include <sys/time.h>
+#include <errno.h>
     p = res;
-    //TODO FQDN not working!
+	int sfd;
+	if ((sfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0)
+		exit_with_error(SOCKET_ERROR);
+		//TODO FQDN not working!
     while (p != NULL)
     {
         if (p->ai_family == AF_INET) // IPv4
         {
 //            printf("canin flag - %x\n", AI_CANONNAME);
 //            printf("canon - %s\n", p->ai_canonname);
+//			printf("KAKA\n");
+//			g_info.address_info =  *(struct sockaddr_in *)p->ai_addr;
+//			g_info.icmp_packet = get_icmp_packet();
+//			g_info.rt_stats = (t_rt_stats *)malloc(sizeof(t_rt_stats));
+//			ft_memset(g_info.rt_stats, 0, sizeof(*g_info.rt_stats));
+//			if (gettimeofday(&g_info.rt_stats->start_time, NULL) != 0)
+//				exit_with_error(GETTIMEOFDAY_ERROR);
+//			update_icmp_packet(g_info.rt_stats->seq, g_info.icmp_packet);
+			printf("KAKA\n");
+			printf("AF_INET6 - %d, value - %d\n", AF_INET6, p->ai_family);
+			printf("addrlen - %d\n", p->ai_addrlen);
+			print_memory(p->ai_addr, p->ai_addrlen);
+			if (sendto(sfd, "kek", 3, 0, p->ai_addr, p->ai_addrlen) < 0) {
+				perror("sendto");
+				printf("%d (%s)\n", errno, strerror(errno));
+			}
+			exit(1);
             return *(struct sockaddr_in *)p->ai_addr;
         }
     }
