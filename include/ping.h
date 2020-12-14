@@ -10,11 +10,13 @@
 ** in seconds
 */
 # define DEFAULT_TIMEOUT 1
+
 # define DEFAULT_TTL 37
 
 # define H_FLAG 0x1
 # define T_FLAG 0x2
 # define C_FLAG 0x4
+# define P_FLAG 0x8
 
 # define COUNT_OPTION_ERROR 1
 # define TTL_OPTION_ERROR 2
@@ -25,6 +27,7 @@
 # define SOCKET_ERROR 7
 # define SENDTO_ERROR 8
 # define SETSOCKOPT_ERROR 9
+# define PATTERN_ERROR 10
 
 /*
 ** 8 bytes
@@ -43,11 +46,12 @@ typedef struct		s_icmp_hdr {
 }					t_icmp_hdr;
 
 /*
-** 16 bytes
+** total 8 + 56 = 64
 */
 typedef struct		s_icmp_pack {
 	t_icmp_hdr		header;
 	struct timeval	tv;
+	void 			*pad;
 }					t_icmp_pack;
 
 /*
@@ -92,8 +96,9 @@ typedef struct		s_info {
 	int					sfd;
 	int					ttl;
 	int					count;
-	int					icmp_data_size;
 	pid_t				pid;
+	long int 			pattern;
+	int 				patternlen;
 	char				dst_char[INET_ADDRSTRLEN];
 	struct sockaddr_in	address_info;
 	// TODO decide if need to be malloced
@@ -133,5 +138,6 @@ void				update_rt_stats(long time);
 u_int16_t			compute_checksum(u_int16_t *addr, int count);
 u_int16_t			ft_htons(u_int16_t x);
 u_int16_t			ft_ntohs(u_int16_t x);
+u_int64_t			ft_htonll(u_int64_t x);
 
 #endif

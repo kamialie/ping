@@ -30,7 +30,7 @@ int		get_socket(void)
 //TODO maybe move to signal handler
 void	send_packet(int sfd, t_icmp_pack *packet, struct sockaddr_in *sin)
 {
-	if (sendto(sfd, packet, sizeof(*packet), 0, (struct sockaddr *)sin, sizeof(*sin)) < 0)
+	if (sendto(sfd, packet, sizeof(packet->header) + DEFAULT_ICMP_DATA, 0, (struct sockaddr *)&g_info.address_info, sizeof(*sin)) < 0)
 		exit_with_error(SENDTO_ERROR);
 	g_info.rt_stats->pkg_sent++;
 }

@@ -48,3 +48,20 @@ u_int16_t	ft_ntohs(u_int16_t x)
 	return (x);
 #endif
 }
+
+u_int64_t ft_htonll(u_int64_t x)
+{
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+
+	u_int64_t new;
+
+	new = (long) ft_htons(x & 0xFFFF) << (12 * 4);
+	new += (long) ft_htons((x & 0xFFFF << (4 * 4)) >> (4 * 4)) << (8 * 4);
+	new += (long) ft_htons((x & (long) 0xFFFF << (8 * 4)) >> (8 * 4)) << (4 * 4);
+	new += (long) ft_htons((x & (long) 0xFFFF << (12 * 4)) >> (12 * 4));
+	return (new);
+#elif __BYTE_ORDER == __BIG_ENDIAN
+
+	return (x);
+#endif
+}

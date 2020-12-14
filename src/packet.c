@@ -1,4 +1,3 @@
-#include <unistd.h>
 #include <string.h>
 #include <arpa/inet.h>
 
@@ -9,18 +8,37 @@
 #include "ping.h"
 #include "lib.h"
 
+static void fill_icmp_pad(void *pad)
+{
+	int i;
+	int len;
+	unsigned char *icmp_pad;
+	unsigned char *pattern;
+
+	len = g_info.patternlen / 2;
+	if (g_info.patternlen % 2 != 0)
+		len++;
+	icmp_pad = pad;
+	pattern = (unsigned char *)&g_info.pattern;
+	i = 0;
+	while (i < DEFAULT_ICMP_DATA)
+		*icmp_pad++ = pattern[i++ % len];
+}
+
 t_icmp_pack *get_icmp_packet()
 {
     size_t len;
     t_icmp_pack *p;
 
-    len = sizeof(t_icmp_hdr) + g_info.icmp_data_size;
+    len = sizeof(t_icmp_hdr) + DEFAULT_ICMP_DATA;
     if ((p = (t_icmp_pack *)malloc(sizeof(char) * len)) == NULL)
     	exit_with_error(MALLOC_ERROR);
     ft_memset(p, 0, len);
-    p->header.type = ICMP_ECHO;
-    p->header.code = 0;
+	p->header.type = ICMP_ECHO;
+	p->header.code = 0;
     p->header.id = ft_htons(g_info.pid);
+    if (g_info.options & P_FLAG)
+		fill_icmp_pad(&p->pad);
     return p;
 }
 
@@ -30,7 +48,7 @@ void update_icmp_packet(int seq, t_icmp_pack *p)
     if (gettimeofday(&p->tv, NULL) != 0)
 		exit_with_error(GETTIMEOFDAY_ERROR);
     p->header.chksum = 0;
-    p->header.chksum = compute_checksum((u_int16_t *)p, sizeof(*p));
+    p->header.chksum = compute_checksum((u_int16_t *)p, sizeof(p->header) + DEFAULT_ICMP_DATA);
 }
 
 // TODO need ntohs
@@ -54,13 +72,12 @@ int verify_received_packet(t_msg_in *msg)
         print_trip_error(icmp_in, address);
         return 1;
     }
-    if (compute_checksum((u_int16_t *)icmp_in, sizeof(*icmp_in)))
+	if (compute_checksum((u_int16_t *)icmp_in, sizeof(t_icmp_hdr) + DEFAULT_ICMP_DATA))
         return 1;
     if (g_info.pid != ft_htons(icmp_in->header.id))
         return 1;
 
     g_info.rt_stats->pkg_received++;
     print_trip_stats(icmp_in, address, ip_hdr->iph_ttl);
-//    print_trip_stats();
     return icmp_in->header.type;
 }

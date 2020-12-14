@@ -28,7 +28,9 @@ void exit_with_error(int code)
 	else if (code == SENDTO_ERROR)
 		fprintf(stderr, "ft_ping: sendto() error.\n");
 	else if (code == SETSOCKOPT_ERROR)
-		fprintf(stderr, "ft_ping: setsockopt() error");
+		fprintf(stderr, "ft_ping: setsockopt() error\n");
+	else if (code == PATTERN_ERROR)
+		fprintf(stderr, "ft_ping: patterns must be specified as hex digits. (16 max)\n");
 	exit(2);
 }
 
