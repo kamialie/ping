@@ -8,24 +8,22 @@
 #include "ping.h"
 #include "lib.h"
 
-static void fill_icmp_pad(void *pad)
+static void fill_icmp_pad(int patternlen, unsigned char *pattern, void *pad)
 {
 	int i;
 	int len;
 	unsigned char *icmp_pad;
-	unsigned char *pattern;
 
-	len = g_info.patternlen / 2;
-	if (g_info.patternlen % 2 != 0)
+	len = patternlen / 2;
+	if (patternlen % 2 != 0)
 		len++;
 	icmp_pad = pad;
-	pattern = (unsigned char *)&g_info.pattern;
 	i = 0;
 	while (i < DEFAULT_ICMP_DATA)
 		*icmp_pad++ = pattern[i++ % len];
 }
 
-t_icmp_pack *get_icmp_packet()
+t_icmp_pack *get_icmp_packet(t_info *info)
 {
     size_t len;
     t_icmp_pack *p;
@@ -36,9 +34,10 @@ t_icmp_pack *get_icmp_packet()
     ft_memset(p, 0, len);
 	p->header.type = ICMP_ECHO;
 	p->header.code = 0;
-    p->header.id = ft_htons(g_info.pid);
-    if (g_info.options & P_FLAG)
-		fill_icmp_pad(&p->pad);
+    p->header.id = ft_htons(info->pid);
+    if (info->options.options & P_FLAG)
+    	fill_icmp_pad(info->options.patternlen,
+				   (unsigned char*)&info->options.pattern, &p->pad);
     return p;
 }
 
@@ -52,7 +51,7 @@ void update_icmp_packet(int seq, t_icmp_pack *p)
 }
 
 // TODO need ntohs
-int verify_received_packet(t_msg_in *msg)
+void verify_received_packet(int pid, t_rt_stats *stats, t_msg_in *msg)
 {
     t_icmp_pack *icmp_in;
     t_ip_hdr *ip_hdr;
@@ -60,24 +59,20 @@ int verify_received_packet(t_msg_in *msg)
 
     ip_hdr = (t_ip_hdr *)msg->io.iov_base;
     icmp_in = (t_icmp_pack *)((char *)msg->io.iov_base + sizeof(t_ip_hdr));
-//    print_memory((void*)&ip_packet->iph_source, sizeof(ip_packet->iph_source));
     inet_ntop(msg->rec_addr.sin_family, (void*)&msg->rec_addr.sin_addr, address, INET6_ADDRSTRLEN);
-//    printf("orig - %d in - %d\n", g_info.rt_stats->seq, ft_htons(icmp_in->header.seq));
     // TODO check previos commits on receiving self echo requests
     if (icmp_in->header.type == ICMP_ECHO)
-        return 1;
+        return;
     if (icmp_in->header.type != ICMP_ECHOREPLY)
     {
-        g_info.rt_stats->errors++;
+        stats->errors++;
         print_trip_error(icmp_in, address);
-        return 1;
+        return;
     }
 	if (compute_checksum((u_int16_t *)icmp_in, sizeof(t_icmp_hdr) + DEFAULT_ICMP_DATA))
-        return 1;
-    if (g_info.pid != ft_htons(icmp_in->header.id))
-        return 1;
-
-    g_info.rt_stats->pkg_received++;
-    print_trip_stats(icmp_in, address, ip_hdr->iph_ttl);
-    return icmp_in->header.type;
+        return;
+    if (pid != ft_htons(icmp_in->header.id))
+        return;
+    stats->pkg_received++;
+	print_trip_stats(ip_hdr->iph_ttl, update_rt_stats(&icmp_in->tv, stats), address, icmp_in);
 }

@@ -53,20 +53,14 @@ int options(int argv, char *args[], t_options *options)
 
 void set_single_option(char option, t_options *options)
 {
-    printf("option - %c\n", option);
     if (option == 'h')
-        g_info.options |= H_FLAG;
+        options->options |= H_FLAG;
 }
 
 void set_options_with_arguments(char option, char *str, t_options *options)
 {
     int value;
 
-//    printf("str - %s\n", str);
-//    printf("option with options\n");
-//    printf("value - %d\n", value);
-//    if (value < 0 || value > 100000)
-//        printf("6\n");//print_usage();
     if (option == 't')
     {
 		value = ft_atoi(str);
@@ -84,7 +78,10 @@ void set_options_with_arguments(char option, char *str, t_options *options)
 		options->count = value;
 	}
     else if (option == 'p')
-    	handle_p_option(str);
+	{
+		options->options |= P_FLAG;
+		handle_p_option(str, options);
+	}
 }
 
 static int char_to_int(char c)

@@ -91,7 +91,7 @@ typedef struct		s_rt_stats {
 	u_int16_t		pkg_sent;
 	u_int16_t		pkg_received;
 	u_int16_t		errors;
-	struct timeval	start_time;
+	struct timeval	tv_start;
 }					t_rt_stats;
 
 typedef struct		s_options
@@ -105,7 +105,7 @@ typedef struct		s_options
 
 typedef struct		s_info {
 	t_options 			options;
-	int					sfd;
+	int					sfd_out;
 	int					sfd_in;
 	pid_t				pid;
 	char				dst_char[INET_ADDRSTRLEN];
@@ -115,31 +115,38 @@ typedef struct		s_info {
 	t_icmp_pack			*icmp_packet;
 }					t_info;
 
-t_info g_info;
-
 int					options(int argv, char *args[], t_options *options);
 struct sockaddr_in	get_address(char *input);
-int					get_socket(void);
-t_icmp_pack			*get_icmp_packet();
+//int					get_socket(void);
+t_icmp_pack			*get_icmp_packet(t_info *info);
 void				update_icmp_packet(int seq, t_icmp_pack *p);
-void				send_packet(int sfd, t_icmp_pack *packet,
+int				send_packet(int sfd, t_icmp_pack *packet,
 										struct sockaddr_in *sin);
-int					verify_received_packet(t_msg_in *msg);
+void				verify_received_packet(int pid, t_rt_stats *stats, t_msg_in *msg);
+
+/*
+** socket
+*/
+
+int					get_socket_out(t_options *opt);
+int 				get_socket_in(void);
 
 /*
 ** output
 */
 void				print_usage(void);
-void				print_execution_intro(char *dst);
-void				print_trip_stats(t_icmp_pack *icmp_in,
-										char *address, int ttl);
+void				print_execution_intro(char *input, char *dst);
+void				print_trip_stats(int ttl, double time, char *address, t_icmp_pack *icmp_in);
 void				print_trip_error(t_icmp_pack *icmp_in, char *address);
-int					print_execution_summary(void);
+int					print_execution_summary(char *dst, t_rt_stats *stats);
 void				print_memory(void *memory, unsigned int len);
 void				exit_with_error(int code);
 
-long				get_trip_time(struct timeval tv_begin);
-void				update_rt_stats(long time);
+/*
+** stats
+*/
+long				get_trip_time(struct timeval *tv_begin);
+double				update_rt_stats(struct timeval *tv_in, t_rt_stats *stats);
 
 /*
 ** utils
