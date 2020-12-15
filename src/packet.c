@@ -50,6 +50,14 @@ void update_icmp_packet(int seq, t_icmp_pack *p)
     p->header.chksum = compute_checksum((u_int16_t *)p, sizeof(p->header) + DEFAULT_ICMP_DATA);
 }
 
+int	send_packet(int sfd, t_icmp_pack *packet, struct sockaddr_in *sin)
+{
+	if (sendto(sfd, packet, sizeof(packet->header) + DEFAULT_ICMP_DATA, 0,
+			   (struct sockaddr *)sin, sizeof(*sin)) < 0)
+		exit_with_error(SENDTO_ERROR);
+	return (1);
+}
+
 // TODO need ntohs
 void verify_received_packet(int pid, t_rt_stats *stats, t_msg_in *msg)
 {
@@ -60,7 +68,7 @@ void verify_received_packet(int pid, t_rt_stats *stats, t_msg_in *msg)
     ip_hdr = (t_ip_hdr *)msg->io.iov_base;
     icmp_in = (t_icmp_pack *)((char *)msg->io.iov_base + sizeof(t_ip_hdr));
     inet_ntop(msg->rec_addr.sin_family, (void*)&msg->rec_addr.sin_addr, address, INET6_ADDRSTRLEN);
-    // TODO check previos commits on receiving self echo requests
+    // TODO check previous commits on receiving self echo requests
     if (icmp_in->header.type == ICMP_ECHO)
         return;
     if (icmp_in->header.type != ICMP_ECHOREPLY)

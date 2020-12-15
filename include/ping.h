@@ -138,7 +138,7 @@ void				print_usage(void);
 void				print_execution_intro(char *input, char *dst);
 void				print_trip_stats(int ttl, double time, char *address, t_icmp_pack *icmp_in);
 void				print_trip_error(t_icmp_pack *icmp_in, char *address);
-int					print_execution_summary(char *dst, t_rt_stats *stats);
+void				print_execution_summary(char *dst, t_rt_stats *stats);
 void				print_memory(void *memory, unsigned int len);
 void				exit_with_error(int code);
 
@@ -155,5 +155,7 @@ u_int16_t			compute_checksum(u_int16_t *addr, int count);
 u_int16_t			ft_htons(u_int16_t x);
 u_int16_t			ft_ntohs(u_int16_t x);
 u_int64_t			ft_htonll(u_int64_t x);
+
+void				exit_program(t_info *info);
 
 #endif

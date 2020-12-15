@@ -67,25 +67,15 @@ void print_trip_error(t_icmp_pack *icmp_in, char *address)
     printf("From %s icmp_seq=%d %s\n", address, ft_ntohs(icmp_in->header.seq), error_message);
 }
 
-int print_execution_summary(char *dst, t_rt_stats *stats)
+void print_execution_summary(char *dst, t_rt_stats *stats)
 {
     // TODO smean
     //sqrt(smean-(mean*mean)
 
-    int status;
     double percent_loss;
     long total_time;
 
-    status = 0;
     total_time = get_trip_time(&stats->tv_start);
-    if (stats->pkg_received == 0)
-        status = 1;
-//    if (rt_stats->pkg_received == 0)
-//        percent_loss = 100;
-//    else if (rt_stats->pkg_received == rt_stats->pkg_sent)
-//        percent_loss = 0;
-//    else
-//        percent_loss = (double) rt_stats->pkg_received / rt_stats->pkg_sent * 100;
     percent_loss = (double) (stats->pkg_sent - stats->pkg_received) / stats->pkg_sent * 100;
     printf("\n--- %s ping statistics ---\n", dst);
     if (stats->errors)
@@ -99,7 +89,6 @@ int print_execution_summary(char *dst, t_rt_stats *stats)
             printf("rtt min/avg/max/mdev = %.5g/%.5g/%.5g/%.5g ms\n",
                    stats->min / 1000.0, stats->max / 1000.0, stats->sum / 1000.0 / stats->pkg_received,0.0);
     }
-    return status;
 }
 
 /*

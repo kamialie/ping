@@ -1,6 +1,4 @@
 #include <sys/socket.h>
-#include <sys/types.h>
-#include <stdio.h>
 #include <netinet/in.h> // protocol macros
 
 #include "ping.h"
@@ -35,13 +33,4 @@ int 	get_socket_in(void)
 	if (setsockopt(sfd, SOL_SOCKET, SO_RCVTIMEO, (char *) &time, sizeof(time)) < 0)
 		exit_with_error(SETSOCKOPT_ERROR);
 	return (sfd);
-}
-
-//TODO maybe move to packet
-int	send_packet(int sfd, t_icmp_pack *packet, struct sockaddr_in *sin)
-{
-	if (sendto(sfd, packet, sizeof(packet->header) + DEFAULT_ICMP_DATA, 0,
-			(struct sockaddr *)sin, sizeof(*sin)) < 0)
-		exit_with_error(SENDTO_ERROR);
-	return (1);
 }
