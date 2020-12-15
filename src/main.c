@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <stdio.h>
+#include <errno.h>
 #include "ping.h"
 #include "lib.h"
 
@@ -11,12 +12,13 @@ void	run_requests(int sfd);
 void	sig_handler(int signo);
 void	prepare_info(char *destination);
 
-//volatile sig_atomic_t g_v = 1;
+volatile sig_atomic_t g_v = 1;
 
 // TODO switch info.address_info to addrinfo to support both IPv4 and IPv6
 int		main(int argv, char *args[])
 {
-	int i = options(argv, args);
+	t_info info;
+	options(argv, args, &info.options);
 //	printf("%ld\n", sizeof(struct timeval));
 //	printf("flags - %x, ttl - %d\n", g_info.options, g_info.ttl);
 //    return 0;
@@ -32,8 +34,9 @@ int		main(int argv, char *args[])
 	return (0);
 }
 
-void	prepare_info(char *destination)
+void	prepare_info(char *destination, t_info *info)
 {
+	info->pid = getpid();
 	g_info.pid = getpid();
 	g_info.sfd = get_socket();
 	if (!(g_info.options & T_FLAG))
@@ -49,7 +52,6 @@ void	prepare_info(char *destination)
 	if (gettimeofday(&g_info.rt_stats->start_time, NULL) != 0)
 		exit_with_error(GETTIMEOFDAY_ERROR);
 	g_info.rt_stats->min = DEFAULT_TIMEOUT * 1000000; // max waiting time
-	g_info.rt_stats->seq = 1;
 }
 
 void	run_requests(int sfd)
@@ -67,36 +69,107 @@ void	run_requests(int sfd)
 	msg.msghdr.msg_iov = &msg.io;
 	msg.msghdr.msg_iovlen = 1;
 
-	sig_handler(SIGALRM);
+//	sig_handler(SIGALRM);
+	g_v = SEND_PACKET;
+	int ret;
+//	while (1)
+//	{
+//		printf("ready to recieve\n");
+//		if (recvmsg(g_info.sfd_in, &msg.msghdr, 0) < 0)
+//		{
+//			if (errno == EINTR)
+//			{
+//				printf("got interrupted\n");
+//				continue;
+//			}
+//			else if (errno != EAGAIN)
+//			{
+//				perror("recvmsg");
+//				exit(2);
+//			}
+//			else
+//				printf("no contents\n");
+//		}
+////			exit_with_error(RECVMSG_ERROR);
+//		verify_received_packet(&msg);
+//		if (g_info.options & C_FLAG && g_info.rt_stats->pkg_sent == g_info.count)
+//		{
+//			close(g_info.sfd);
+//			free(g_info.icmp_packet);
+//			exit(print_execution_summary());
+//		}
+//		// TODO think about changing the size of icmp packet
+//	}
 	while (1)
 	{
-		if (recvmsg(sfd, &msg.msghdr, 0) < 0)
-			exit_with_error(RECVMSG_ERROR);
-		verify_received_packet(&msg);
+		if (g_v == SEND_PACKET)
+		{
+			update_icmp_packet(g_info.rt_stats->pkg_sent + 1, g_info.icmp_packet);
+			send_packet(g_info.sfd, g_info.icmp_packet, &g_info.address_info);
+			g_v = DO_NOTHING;
+			if (g_info.options & C_FLAG && g_info.count == g_info.rt_stats->pkg_sent)
+				// TODO call exit function?
+				alarm(0);
+			else
+				alarm(1);
+		}
+		else if (g_v == EXIT)
+		{
+			close(g_info.sfd);
+			free(g_info.icmp_packet);
+			exit(print_execution_summary());
+		}
+		if (recvmsg(g_info.sfd_in, &msg.msghdr, 0) < 0)
+		{
+			if (errno == EINTR)
+			{
+				printf("got interrupted\n");
+				continue;
+			}
+			else if (errno != EAGAIN)
+			{
+				perror("recvmsg");
+				exit(2);
+			}
+			else
+				printf("no contents\n");
+		}
+		else
+		{
+			verify_received_packet(&msg);
+		}
 		if (g_info.options & C_FLAG && g_info.rt_stats->pkg_sent == g_info.count)
 		{
 			close(g_info.sfd);
 			free(g_info.icmp_packet);
 			exit(print_execution_summary());
 		}
-		// TODO think about changing the size of icmp packet
+//			exit_with_error(RECVMSG_ERROR);
 	}
 }
 
-void	sig_handler(int signo)
+void 	sig_handler(int signo)
 {
 	if (signo == SIGALRM)
-	{
-		update_icmp_packet(g_info.rt_stats->seq, g_info.icmp_packet);
-		send_packet(g_info.sfd, g_info.icmp_packet, &g_info.address_info);
-		//TODO get rid of duplicating seq and pack_set?
-		g_info.rt_stats->seq++;
-		alarm(1);
-	}
+		g_v = SEND_PACKET;
 	else if (signo == SIGINT)
-	{
-		close(g_info.sfd);
-		free(g_info.icmp_packet);
-		exit(print_execution_summary());
-	}
+		g_v = EXIT;
 }
+//void	sig_handler(int signo)
+//{
+//	if (signo == SIGALRM)
+//	{
+//		update_icmp_packet(g_info.rt_stats->pkg_sent + 1, g_info.icmp_packet);
+//		send_packet(g_info.sfd, g_info.icmp_packet, &g_info.address_info);
+//		if (g_info.options & C_FLAG && g_info.count == g_info.rt_stats->pkg_sent)
+//			alarm(0);
+//		else
+//			alarm(1);
+//	}
+//	else if (signo == SIGINT)
+//	{
+//		close(g_info.sfd);
+//		free(g_info.icmp_packet);
+//		exit(print_execution_summary());
+//	}
+//}

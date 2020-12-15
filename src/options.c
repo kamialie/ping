@@ -3,11 +3,11 @@
 #include "ping.h"
 #include "lib.h"
 
-void set_single_option(char option);
-void set_options_with_arguments(char option, char *str);
-void handle_p_option(char *str);
+void set_single_option(char option, t_options *options);
+void set_options_with_arguments(char option, char *str, t_options *options);
+void handle_p_option(char *str, t_options *options);
 
-int options(int argv, char *args[])
+int options(int argv, char *args[], t_options *options)
 {
     int i;
     char *str;
@@ -27,17 +27,17 @@ int options(int argv, char *args[])
             {
                 if (*(str + 1) != '\0')
                     printf("2\n");//print_usage();
-                set_single_option(*str);
+                set_single_option(*str, options);
             }
             else if (ft_strchr(options_with_arg, *str) != NULL)
             {
                 if (*(str + 1) != '\0')
-                    set_options_with_arguments(*str, str + 1);
+                    set_options_with_arguments(*str, str + 1, options);
                 else
                 {
                     if (i + 2 > argv - 1)
                         print_usage();
-                    set_options_with_arguments(*str, args[++i]);
+                    set_options_with_arguments(*str, args[++i], options);
                 }
             }
             else
@@ -51,14 +51,14 @@ int options(int argv, char *args[])
     return 1;
 }
 
-void set_single_option(char option)
+void set_single_option(char option, t_options *options)
 {
     printf("option - %c\n", option);
     if (option == 'h')
         g_info.options |= H_FLAG;
 }
 
-void set_options_with_arguments(char option, char *str)
+void set_options_with_arguments(char option, char *str, t_options *options)
 {
     int value;
 
@@ -72,16 +72,16 @@ void set_options_with_arguments(char option, char *str)
 		value = ft_atoi(str);
 		if (value <= 0 || value > 255)
 			exit_with_error(TTL_OPTION_ERROR);
-		g_info.options |= T_FLAG;
-        g_info.ttl = value;
+		options->options |= T_FLAG;
+		options->ttl = value;
     }
     else if (option == 'c')
 	{
 		value = ft_atoi(str);
 		if (value <= 0)
 			exit_with_error(COUNT_OPTION_ERROR);
-		g_info.options |= C_FLAG;
-		g_info.count = value;
+		options->options |= C_FLAG;
+		options->count = value;
 	}
     else if (option == 'p')
     	handle_p_option(str);
@@ -100,7 +100,7 @@ static int char_to_int(char c)
 	return (-1);
 }
 
-void handle_p_option(char *str)
+void handle_p_option(char *str, t_options *options)
 {
 	size_t 	len;
 	size_t 	i;
@@ -109,8 +109,8 @@ void handle_p_option(char *str)
 
 	if ((len = ft_strlen(str)) > 16)
 		exit_with_error(PATTERN_ERROR);
-	g_info.patternlen = (int) len;
-	pattern = (unsigned char *)&g_info.pattern;
+	options->patternlen = (int) len;
+	pattern = (unsigned char *)&options->pattern;
 	i = 0;
 	j = 0;
 	while (i < len)

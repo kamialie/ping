@@ -4,12 +4,16 @@
 # include <stdlib.h> // u_int8_t
 # include <netinet/in.h> // protocol macros
 
+# define DO_NOTHING 0
+# define SEND_PACKET 1
+# define EXIT 2
+
 # define DEFAULT_ICMP_DATA 56
 
 /*
 ** in seconds
 */
-# define DEFAULT_TIMEOUT 1
+# define DEFAULT_TIMEOUT 2
 
 # define DEFAULT_TTL 37
 
@@ -84,21 +88,26 @@ typedef struct		s_rt_stats {
 	long			max;
 	long			sum;
 	long			sum2;
-	u_int16_t		seq;
 	u_int16_t		pkg_sent;
 	u_int16_t		pkg_received;
 	u_int16_t		errors;
 	struct timeval	start_time;
 }					t_rt_stats;
 
+typedef struct		s_options
+{
+	int			options;
+	int			ttl;
+	int			count;
+	long int	pattern;
+	int 		patternlen;
+}					t_options;
+
 typedef struct		s_info {
-	int					options;
+	t_options 			options;
 	int					sfd;
-	int					ttl;
-	int					count;
+	int					sfd_in;
 	pid_t				pid;
-	long int 			pattern;
-	int 				patternlen;
 	char				dst_char[INET_ADDRSTRLEN];
 	struct sockaddr_in	address_info;
 	// TODO decide if need to be malloced
@@ -108,7 +117,7 @@ typedef struct		s_info {
 
 t_info g_info;
 
-int					options(int argv, char *args[]);
+int					options(int argv, char *args[], t_options *options);
 struct sockaddr_in	get_address(char *input);
 int					get_socket(void);
 t_icmp_pack			*get_icmp_packet();
