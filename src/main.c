@@ -7,6 +7,8 @@
 #include "ping.h"
 #include "lib.h"
 
+#include <stdio.h>
+
 void	run_requests(t_info *info);
 void	sig_handler(int signo);
 void	prepare_info(char *input, t_info *info);
@@ -71,6 +73,8 @@ void	prepare_info(char *input, t_info *info)
 	info->rt_stats->min = DEFAULT_TIMEOUT * 1000000; // max waiting time
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
 /*
 ** recvmsg is set to non-blocking mode
 ** and will exit with errno set to EINTR
@@ -78,25 +82,27 @@ void	prepare_info(char *input, t_info *info)
 ** and to EAGAIN when did not recieve any
 ** message by the end of timer
 */
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
 void	run_requests(t_info *info)
 {
 	t_msg_in	msg;
 
 	prepare_msg_object(&msg);
+	if (info->options.options & L_FLAG) {
+		while (info->options.preload-- > 0) {
+			update_icmp_packet(info->rt_stats->pkg_sent + 1, info->icmp_packet);
+			info->rt_stats->pkg_sent += send_packet(info->sfd_out, info->icmp_packet, &info->address_info);
+		}
+	}
 	// TODO think about changing the size of icmp packet
 	while (1)
 	{
-		if (g_v == SEND_PACKET)
+		if (g_v == SEND_PACKET )
 		{
 			update_icmp_packet(info->rt_stats->pkg_sent + 1, info->icmp_packet);
 			info->rt_stats->pkg_sent += send_packet(info->sfd_out, info->icmp_packet, &info->address_info);
 			g_v = DO_NOTHING;
 			alarm(1);
 		}
-		else if (g_v == EXIT)
-			exit_program(info);
 		if (recvmsg(info->sfd_in, &msg.msghdr, 0) < 0)
 		{
 			if (errno != EINTR && errno != EAGAIN)
@@ -104,6 +110,8 @@ void	run_requests(t_info *info)
 		}
 		else
 			verify_received_packet(info->pid, info->rt_stats, &msg);
+		if (g_v == EXIT)
+			exit_program(info);
 		if (info->options.options & C_FLAG && info->rt_stats->pkg_sent == info->options.count)
 			exit_program(info);
 	}

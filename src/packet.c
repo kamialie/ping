@@ -8,6 +8,8 @@
 #include "ping.h"
 #include "lib.h"
 
+#include <stdio.h>
+
 static void fill_icmp_pad(int patternlen, unsigned char *pattern, void *pad)
 {
 	int i;
@@ -36,8 +38,10 @@ t_icmp_pack *get_icmp_packet(t_info *info)
 	p->header.code = 0;
     p->header.id = ft_htons(info->pid);
     if (info->options.options & P_FLAG)
-    	fill_icmp_pad(info->options.patternlen,
-				   (unsigned char*)&info->options.pattern, &p->pad);
+	{
+		fill_icmp_pad(info->options.patternlen,
+				(unsigned char*)&info->options.pattern, &p->pad);
+	}
     return p;
 }
 

@@ -21,17 +21,19 @@
 # define T_FLAG 0x2
 # define C_FLAG 0x4
 # define P_FLAG 0x8
+# define L_FLAG 0x10
 
 # define COUNT_OPTION_ERROR 1
 # define TTL_OPTION_ERROR 2
-# define RECVMSG_ERROR 3
-# define GETTIMEOFDAY_ERROR 4
-# define SIGNAL_ERROR 5
-# define MALLOC_ERROR 6
-# define SOCKET_ERROR 7
-# define SENDTO_ERROR 8
-# define SETSOCKOPT_ERROR 9
-# define PATTERN_ERROR 10
+# define PRELOAD_ERROR 3
+# define RECVMSG_ERROR 4
+# define GETTIMEOFDAY_ERROR 5
+# define SIGNAL_ERROR 6
+# define MALLOC_ERROR 7
+# define SOCKET_ERROR 8
+# define SENDTO_ERROR 9
+# define SETSOCKOPT_ERROR 10
+# define PATTERN_ERROR 11
 
 /*
 ** 8 bytes
@@ -99,6 +101,7 @@ typedef struct		s_options
 	int			options;
 	int			ttl;
 	int			count;
+	int			preload;
 	long int	pattern;
 	int 		patternlen;
 }					t_options;

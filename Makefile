@@ -15,7 +15,7 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	gcc -o $(NAME) $(OBJ)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c include/ping.h include/lib.h $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c include/ping.h include/lib.h | $(OBJ_DIR)
 	gcc $(FLAGS) -g -c -I include -o $@ $<
 
 $(OBJ_DIR):

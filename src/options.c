@@ -12,7 +12,7 @@ int options(int argv, char *args[], t_options *options)
     int i;
     char *str;
     char *single_options = "hv";
-    char *options_with_arg = "cpt";
+    char *options_with_arg = "cptl";
 
 //    if (argv < 2)
 //        print_usage();
@@ -76,6 +76,14 @@ void set_options_with_arguments(char option, char *str, t_options *options)
 			exit_with_error(COUNT_OPTION_ERROR);
 		options->options |= C_FLAG;
 		options->count = value;
+	}
+    else if (option == 'l')
+	{
+		value = ft_atoi(str);
+		if (value <= 0 || value > 10)
+			exit_with_error(PRELOAD_ERROR);
+		options->options |= L_FLAG;
+		options->preload = value;
 	}
     else if (option == 'p')
 	{

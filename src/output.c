@@ -15,6 +15,8 @@ void exit_with_error(int code)
 		fprintf(stderr, "ft_ping: bad number of packets to transmit.\n");
 	if (code == TTL_OPTION_ERROR)
         fprintf(stderr, "ft_ping: ttl out of range.\n");
+	else if (code == PRELOAD_ERROR)
+		fprintf(stderr, "ft_ping: preload out of range\n");
 	else if (code == RECVMSG_ERROR)
 		fprintf(stderr, "ft_ping: recvmsg() error.\n");
 	else if (code == GETTIMEOFDAY_ERROR)
