@@ -12,7 +12,7 @@ int options(int argv, char *args[], t_options *options)
     int i;
     char *str;
     char *single_options = "hv";
-    char *options_with_arg = "cptl";
+    char *options_with_arg = "cptls";
 
 //    if (argv < 2)
 //        print_usage();
@@ -84,6 +84,14 @@ void set_options_with_arguments(char option, char *str, t_options *options)
 			exit_with_error(PRELOAD_ERROR);
 		options->options |= L_FLAG;
 		options->preload = value;
+	}
+    else if (option == 's')
+	{
+		value = ft_atoi(str);
+		if (value <= 0 || value > 512)
+			exit_with_error(ICMP_DATA_SIZE_ERROR);
+		options->options |= S_FLAG;
+		options->icmp_data_size = value;
 	}
     else if (option == 'p')
 	{

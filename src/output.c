@@ -17,6 +17,8 @@ void exit_with_error(int code)
         fprintf(stderr, "ft_ping: ttl out of range.\n");
 	else if (code == PRELOAD_ERROR)
 		fprintf(stderr, "ft_ping: preload out of range\n");
+	else if (code == ICMP_DATA_SIZE_ERROR)
+		fprintf(stderr, "ft_ping: icmp data size out of range\n");
 	else if (code == RECVMSG_ERROR)
 		fprintf(stderr, "ft_ping: recvmsg() error.\n");
 	else if (code == GETTIMEOFDAY_ERROR)
@@ -36,16 +38,15 @@ void exit_with_error(int code)
 	exit(2);
 }
 
-void	print_execution_intro(char *input, char *dst)
+void	print_execution_intro(char *input, char *dst, int icmp_data_size)
 {
     printf("PING %s (%s) %d(%ld) bytes of data.\n",
-           input, dst, DEFAULT_ICMP_DATA,
-           DEFAULT_ICMP_DATA + sizeof(t_icmp_hdr) + sizeof(t_ip_hdr));
+           input, dst, icmp_data_size, icmp_data_size + sizeof(t_icmp_hdr) + sizeof(t_ip_hdr));
 }
 
 // TODO output data from incoming packet
 //void print_trip_stats(t_icmp_pack *icmp_in, char *address, int ttl)
-void print_trip_stats(int ttl, double time, char *address, t_icmp_pack *icmp_in)
+void print_trip_stats(int ttl, double time, char *address, u_int16_t seq, int icmp_size)
 {
 //    t_icmp_hdr  hdr;
 //    char address[INET_ADDRSTRLEN];
@@ -53,8 +54,10 @@ void print_trip_stats(int ttl, double time, char *address, t_icmp_pack *icmp_in)
 //    inet_ntop(rec_addr->sin_family, (void*)&rec_addr->sin_addr, address, INET6_ADDRSTRLEN);
 //        hdr = g_info.icmp_packet->header;
 	//TODO possibly remove sizeof call
-    printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%#.3g ms\n",
-           DEFAULT_ICMP_DATA + (int)sizeof(t_icmp_hdr), address, ft_ntohs(icmp_in->header.seq), ttl, time);
+	if (icmp_size >= ICMP_MINIMUM_SIZE)
+		printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%#.3g ms\n", icmp_size, address, seq, ttl, time);
+	else
+		printf("%d bytes from %s: icmp_seq=%d ttl=%d\n", icmp_size, address, seq, ttl);
 }
 
 void print_trip_error(t_icmp_pack *icmp_in, char *address)

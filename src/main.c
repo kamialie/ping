@@ -32,7 +32,7 @@ int		main(int argv, char *args[])
 		exit_with_error(SIGNAL_ERROR);
 	if (signal(SIGINT, sig_handler) == SIG_ERR)
 		exit_with_error(SIGNAL_ERROR);
-	print_execution_intro(args[argv - 1], info.dst_char);
+	print_execution_intro(args[argv - 1], info.dst_char, info.options.icmp_data_size);
 	//TODO choose between normal return and use of exit
 	run_requests(&info);
 	return (0);
@@ -61,6 +61,10 @@ void	prepare_info(char *input, t_info *info)
 	info->sfd_in = get_socket_in();
 	if (!(info->options.options & T_FLAG))
 		info->options.ttl = DEFAULT_TTL;
+	printf("flags - %d\n", info->options.options);
+	if (!(info->options.options & S_FLAG))
+		info->options.icmp_data_size = DEFAULT_ICMP_DATA_SIZE;
+	info->icmp_size = (int) sizeof(t_icmp_hdr) + info->options.icmp_data_size;
 	//TODO check if input already an address
 	info->address_info = get_address(input);
 	inet_ntop(AF_INET, &(info->address_info.sin_addr), info->dst_char, sizeof(info->dst_char));
@@ -89,17 +93,17 @@ void	run_requests(t_info *info)
 	prepare_msg_object(&msg);
 	if (info->options.options & L_FLAG) {
 		while (info->options.preload-- > 0) {
-			update_icmp_packet(info->rt_stats->pkg_sent + 1, info->icmp_packet);
-			info->rt_stats->pkg_sent += send_packet(info->sfd_out, info->icmp_packet, &info->address_info);
+			update_icmp_packet(info->rt_stats->pkg_sent + 1, info->icmp_size, info->icmp_packet);
+			info->rt_stats->pkg_sent += send_packet(info->sfd_out, info->icmp_size, info->icmp_packet, &info->address_info);
 		}
 	}
 	// TODO think about changing the size of icmp packet
 	while (1)
 	{
-		if (g_v == SEND_PACKET )
+		if (g_v == SEND_PACKET)
 		{
-			update_icmp_packet(info->rt_stats->pkg_sent + 1, info->icmp_packet);
-			info->rt_stats->pkg_sent += send_packet(info->sfd_out, info->icmp_packet, &info->address_info);
+			update_icmp_packet(info->rt_stats->pkg_sent + 1, info->icmp_size, info->icmp_packet);
+			info->rt_stats->pkg_sent += send_packet(info->sfd_out, info->icmp_size, info->icmp_packet, &info->address_info);
 			g_v = DO_NOTHING;
 			alarm(1);
 		}
@@ -109,7 +113,7 @@ void	run_requests(t_info *info)
 				exit_with_error(RECVMSG_ERROR);
 		}
 		else
-			verify_received_packet(info->pid, info->rt_stats, &msg);
+			verify_received_packet(info->pid, info->icmp_size, info->rt_stats, &msg);
 		if (g_v == EXIT)
 			exit_program(info);
 		if (info->options.options & C_FLAG && info->rt_stats->pkg_sent == info->options.count)

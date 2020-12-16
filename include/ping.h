@@ -9,6 +9,9 @@
 # define EXIT 2
 
 # define DEFAULT_ICMP_DATA 56
+# define DEFAULT_ICMP_DATA_SIZE 56
+
+# define ICMP_MINIMUM_SIZE 16
 
 /*
 ** in seconds
@@ -22,6 +25,7 @@
 # define C_FLAG 0x4
 # define P_FLAG 0x8
 # define L_FLAG 0x10
+# define S_FLAG 0x20
 
 # define COUNT_OPTION_ERROR 1
 # define TTL_OPTION_ERROR 2
@@ -34,6 +38,7 @@
 # define SENDTO_ERROR 9
 # define SETSOCKOPT_ERROR 10
 # define PATTERN_ERROR 11
+# define ICMP_DATA_SIZE_ERROR 12
 
 /*
 ** 8 bytes
@@ -52,7 +57,7 @@ typedef struct		s_icmp_hdr {
 }					t_icmp_hdr;
 
 /*
-** total 8 + 56 = 64
+** total 8 + 56 = 64 (default)
 */
 typedef struct		s_icmp_pack {
 	t_icmp_hdr		header;
@@ -104,12 +109,14 @@ typedef struct		s_options
 	int			preload;
 	long int	pattern;
 	int 		patternlen;
+	int 		icmp_data_size;
 }					t_options;
 
 typedef struct		s_info {
 	t_options 			options;
 	int					sfd_out;
 	int					sfd_in;
+	int 				icmp_size;
 	pid_t				pid;
 	char				dst_char[INET_ADDRSTRLEN];
 	struct sockaddr_in	address_info;
@@ -120,12 +127,10 @@ typedef struct		s_info {
 
 int					options(int argv, char *args[], t_options *options);
 struct sockaddr_in	get_address(char *input);
-//int					get_socket(void);
 t_icmp_pack			*get_icmp_packet(t_info *info);
-void				update_icmp_packet(int seq, t_icmp_pack *p);
-int				send_packet(int sfd, t_icmp_pack *packet,
-										struct sockaddr_in *sin);
-void				verify_received_packet(int pid, t_rt_stats *stats, t_msg_in *msg);
+void				update_icmp_packet(int seq, int icmp_size, t_icmp_pack *p);
+int					send_packet(int sfd, int icmp_size, t_icmp_pack *packet, struct sockaddr_in *sin);
+void				verify_received_packet(int pid, int icmp_size, t_rt_stats *stats, t_msg_in *msg);
 
 /*
 ** socket
@@ -138,8 +143,8 @@ int 				get_socket_in(void);
 ** output
 */
 void				print_usage(void);
-void				print_execution_intro(char *input, char *dst);
-void				print_trip_stats(int ttl, double time, char *address, t_icmp_pack *icmp_in);
+void				print_execution_intro(char *input, char *dst, int icmp_data_size);
+void				print_trip_stats(int ttl, double time, char *address, u_int16_t seq, int icmp_size);
 void				print_trip_error(t_icmp_pack *icmp_in, char *address);
 void				print_execution_summary(char *dst, t_rt_stats *stats);
 void				print_memory(void *memory, unsigned int len);
