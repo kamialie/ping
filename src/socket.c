@@ -1,5 +1,5 @@
 #include <sys/socket.h>
-#include <netinet/in.h> // protocol macros
+#include <netinet/in.h>
 
 #include "ping.h"
 
@@ -12,12 +12,6 @@ int 	get_socket_out(t_options *opt)
 	if (opt->options & T_FLAG)
 		if (setsockopt(sfd, IPPROTO_IP, IP_TTL, &opt->ttl, sizeof(opt->ttl)) < 0)
 			exit_with_error(SETSOCKOPT_ERROR);
-//    if (g_info.options & B_FLAG)
-//        if(setsockopt(sfd, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on)) < 0)
-//        {
-//            perror("setsockopt() error");
-//            exit(-1);
-//        }
 	return (sfd);
 }
 

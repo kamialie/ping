@@ -4,11 +4,14 @@
 # include <stdlib.h> // u_int8_t
 # include <netinet/in.h> // protocol macros
 
+/*
+** global variable controlling the flow of the program
+** can take the following values
+*/
 # define DO_NOTHING 0
 # define SEND_PACKET 1
 # define EXIT 2
 
-# define DEFAULT_ICMP_DATA 56
 # define DEFAULT_ICMP_DATA_SIZE 56
 
 # define ICMP_MINIMUM_SIZE 16
@@ -20,25 +23,28 @@
 
 # define DEFAULT_TTL 37
 
-# define H_FLAG 0x1
-# define T_FLAG 0x2
-# define C_FLAG 0x4
-# define P_FLAG 0x8
-# define L_FLAG 0x10
-# define S_FLAG 0x20
+# define SINGLE_OPTIONS "hv"
+# define OPTIONS_WITH_ARGUMENTS "cptls"
 
-# define COUNT_OPTION_ERROR 1
-# define TTL_OPTION_ERROR 2
-# define PRELOAD_ERROR 3
-# define RECVMSG_ERROR 4
+# define H_FLAG 0x1
+# define V_FLAG 0x2
+# define T_FLAG 0x4
+# define C_FLAG 0x8
+# define P_FLAG 0x10
+# define L_FLAG 0x20
+# define S_FLAG 0x40
+
+/*
+** you must be laughing :)
+*/
+# define RECVMSG_ERROR 3
 # define GETTIMEOFDAY_ERROR 5
 # define SIGNAL_ERROR 6
 # define MALLOC_ERROR 7
-# define SOCKET_ERROR 8
-# define SENDTO_ERROR 9
-# define SETSOCKOPT_ERROR 10
-# define PATTERN_ERROR 11
-# define ICMP_DATA_SIZE_ERROR 12
+# define SOCKET_ERROR 9
+# define SENDTO_ERROR 10
+# define SETSOCKOPT_ERROR 11
+# define PATTERN_ERROR 12
 
 /*
 ** 8 bytes
@@ -125,12 +131,25 @@ typedef struct		s_info {
 	t_icmp_pack			*icmp_packet;
 }					t_info;
 
-int					options(int argv, char *args[], t_options *options);
+/*
+** options
+*/
+
+void				options(int argv, char *args[], t_options *options);
+
+/*
+** address
+*/
+
 struct sockaddr_in	get_address(char *input);
+
+/*
+** packet
+*/
 t_icmp_pack			*get_icmp_packet(t_info *info);
 void				update_icmp_packet(int seq, int icmp_size, t_icmp_pack *p);
-int					send_packet(int sfd, int icmp_size, t_icmp_pack *packet, struct sockaddr_in *sin);
-void				verify_received_packet(int pid, int icmp_size, t_rt_stats *stats, t_msg_in *msg);
+int					send_packet(struct sockaddr_in *sin, t_info *info);
+void				verify_received_packet(t_msg_in *msg, t_rt_stats *stats, t_info *info);
 
 /*
 ** socket
@@ -145,7 +164,6 @@ int 				get_socket_in(void);
 void				print_usage(void);
 void				print_execution_intro(char *input, char *dst, int icmp_data_size);
 void				print_trip_stats(int ttl, double time, char *address, u_int16_t seq, int icmp_size);
-void				print_trip_error(t_icmp_pack *icmp_in, char *address);
 void				print_execution_summary(char *dst, t_rt_stats *stats);
 void				print_memory(void *memory, unsigned int len);
 void				exit_with_error(int code);

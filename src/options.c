@@ -1,103 +1,82 @@
 #include <string.h>
-#include <stdio.h>
 #include "ping.h"
 #include "lib.h"
 
-void set_single_option(char option, t_options *options);
+void set_single_option(const char *str, t_options *options);
 void set_options_with_arguments(char option, char *str, t_options *options);
-void handle_p_option(char *str, t_options *options);
+void set_p_option(char *str, t_options *options);
+int	get_value(char *str, int option, int min, int max, int *options);
 
-int options(int argv, char *args[], t_options *options)
+void options(int argv, char *args[], t_options *options)
 {
     int i;
     char *str;
-    char *single_options = "hv";
-    char *options_with_arg = "cptls";
 
-//    if (argv < 2)
-//        print_usage();
-//    printf("argv - %d i - %d\n", argv, i);
-    i = 1;
-    while (i < argv)
+    i = 0;
+    while (++i < argv)
     {
         str = args[i];
         if (*str++ == '-')
         {
-            if (ft_strchr(single_options, *str) != NULL)
-            {
-                if (*(str + 1) != '\0')
-                    printf("2\n");//print_usage();
-                set_single_option(*str, options);
-            }
-            else if (ft_strchr(options_with_arg, *str) != NULL)
+            if (ft_strchr(SINGLE_OPTIONS, *str) != NULL)
+                set_single_option(str, options);
+            else if (ft_strchr(OPTIONS_WITH_ARGUMENTS, *str) != NULL)
             {
                 if (*(str + 1) != '\0')
                     set_options_with_arguments(*str, str + 1, options);
+                else if (i + 2 > argv - 1)
+					print_usage();
                 else
-                {
-                    if (i + 2 > argv - 1)
-                        print_usage();
                     set_options_with_arguments(*str, args[++i], options);
-                }
             }
             else
-                printf("3\n");//print_usage();
+                print_usage();
         }
         else
-            return 1;
-        i++;
+            return ;
     }
-    printf("5\n");//print_usage();
-    return 1;
+    print_usage();
 }
 
-void set_single_option(char option, t_options *options)
+void set_single_option(const char *str, t_options *options)
 {
-    if (option == 'h')
-        options->options |= H_FLAG;
+	char option;
+
+	if (*(str + 1) != '\0')
+		print_usage();
+	option = *str;
+	if (option == 'h')
+		options->options |= H_FLAG;
+	else if (option == 'v')
+		options->options |= V_FLAG;
 }
 
-void set_options_with_arguments(char option, char *str, t_options *options)
+void set_options_with_arguments(char option, char *str, t_options *opt)
 {
-    int value;
+    if (option == 'p')
+		set_p_option(str, opt);
+    else
+	{
+		if (option == 't')
+			opt->ttl = get_value(str, T_FLAG, 0, 255, &opt->options);
+		else if (option == 'c')
+			opt->count = get_value(str, C_FLAG, 0, 512, &opt->options);
+		else if (option == 'l')
+			opt->preload = get_value(str, L_FLAG, 0, 10, &opt->options);
+		else if (option == 's')
+			opt->icmp_data_size = get_value(str, S_FLAG, 0, 512, &opt->options);
+	}
+}
 
-    if (option == 't')
-    {
-		value = ft_atoi(str);
-		if (value <= 0 || value > 255)
-			exit_with_error(TTL_OPTION_ERROR);
-		options->options |= T_FLAG;
-		options->ttl = value;
-    }
-    else if (option == 'c')
-	{
-		value = ft_atoi(str);
-		if (value <= 0)
-			exit_with_error(COUNT_OPTION_ERROR);
-		options->options |= C_FLAG;
-		options->count = value;
-	}
-    else if (option == 'l')
-	{
-		value = ft_atoi(str);
-		if (value <= 0 || value > 10)
-			exit_with_error(PRELOAD_ERROR);
-		options->options |= L_FLAG;
-		options->preload = value;
-	}
-    else if (option == 's')
-	{
-		value = ft_atoi(str);
-		if (value <= 0 || value > 512)
-			exit_with_error(ICMP_DATA_SIZE_ERROR);
-		options->options |= S_FLAG;
-		options->icmp_data_size = value;
-	}
-    else if (option == 'p')
-	{
-		options->options |= P_FLAG;
-		handle_p_option(str, options);
-	}
+int get_value(char *str, int option, int min, int max, int *options)
+{
+	int value;
+
+	value = ft_atoi(str);
+	if (value <= min || value > max)
+		exit_with_error(option);
+	*options |= option;
+	return (value);
 }
 
 static int char_to_int(char c)
@@ -113,13 +92,14 @@ static int char_to_int(char c)
 	return (-1);
 }
 
-void handle_p_option(char *str, t_options *options)
+void set_p_option(char *str, t_options *options)
 {
 	size_t 	len;
 	size_t 	i;
 	size_t 	j;
 	unsigned char 	*pattern;
 
+	options->options |= P_FLAG;
 	if ((len = ft_strlen(str)) > 16)
 		exit_with_error(PATTERN_ERROR);
 	options->patternlen = (int) len;
