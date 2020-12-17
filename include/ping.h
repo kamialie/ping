@@ -1,8 +1,8 @@
 #ifndef PING_H
 # define PING_H
 
-# include <stdlib.h> // u_int8_t
-# include <netinet/in.h> // protocol macros
+# include <stdlib.h>
+# include <netinet/in.h>
 
 /*
 ** global variable controlling the flow of the program
@@ -68,7 +68,7 @@ typedef struct		s_icmp_hdr {
 typedef struct		s_icmp_pack {
 	t_icmp_hdr		header;
 	struct timeval	tv;
-	void 			*pad;
+	void			*pad;
 }					t_icmp_pack;
 
 /*
@@ -112,15 +112,15 @@ typedef struct		s_options
 	int			count;
 	int			preload;
 	long int	pattern;
-	int 		patternlen;
-	int 		icmp_data_size;
+	int			patternlen;
+	int			icmp_data_size;
 }					t_options;
 
 typedef struct		s_info {
-	t_options 			options;
+	t_options			options;
 	int					sfd_out;
 	int					sfd_in;
-	int 				icmp_size;
+	int					icmp_size;
 	pid_t				pid;
 	char				dst_char[INET_ADDRSTRLEN];
 	struct sockaddr_in	address_info;
@@ -153,15 +153,18 @@ void				verify_received_packet(t_msg_in *msg, t_rt_stats *stats, t_info *info);
 */
 
 int					get_socket_out(t_options *opt);
-int 				get_socket_in(void);
+int					get_socket_in(void);
 
 /*
 ** output
 */
 void				print_usage(void);
-void				print_execution_intro(char *input, char *dst, int icmp_data_size);
-void				print_trip_stats(int ttl, double time, char *address, u_int16_t seq, int icmp_size);
-void				print_execution_summary(int icmp_size, char *dst, t_rt_stats *stats);
+void				print_execution_intro(char *input, char *dst,
+												int icmp_data_size);
+void				print_trip_stats(int ttl, double time, char *address,
+											u_int16_t seq, int icmp_size);
+void				print_execution_summary(int icmp_size, char *dst,
+													t_rt_stats *stats);
 void				print_memory(void *memory, unsigned int len);
 
 /*

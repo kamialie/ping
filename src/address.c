@@ -9,11 +9,12 @@
 
 struct sockaddr_in get_address(char *input)
 {
-	struct addrinfo hints, *res;
-	int status;
+	int				status;
+	struct addrinfo	hints;
+	struct addrinfo	*res;
 
-	ft_memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_UNSPEC; /*either IPV4 or IPV6*/
+	ft_memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
 	if ((status = getaddrinfo(input, 0, &hints, &res)) < 0)
 	{
@@ -23,7 +24,7 @@ struct sockaddr_in get_address(char *input)
 			fprintf(stderr, "ft_ping: getaddrinfo() error\n");
 		exit(2);
 	}
-    while (res != NULL)
+	while (res != NULL)
     {
         if (res->ai_family == AF_INET)
 		{

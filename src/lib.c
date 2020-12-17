@@ -50,7 +50,7 @@ int		ft_atoi(const char *str)
 	return (int)(i * sign);
 }
 
-size_t ft_strlen(const char *str)
+size_t	ft_strlen(const char *str)
 {
 	size_t len;
 

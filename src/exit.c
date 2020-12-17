@@ -3,7 +3,7 @@
 
 #include "ping.h"
 
-void exit_program(t_msg_in *msg, t_info *info)
+void	exit_program(t_msg_in *msg, t_info *info)
 {
 	print_execution_summary(info->icmp_size, info->dst_char, info->rt_stats);
 	if (info->rt_stats->pkg_sent != info->rt_stats->pkg_received)
@@ -16,18 +16,18 @@ void exit_program(t_msg_in *msg, t_info *info)
 	free(info->rt_stats);
 }
 
-void exit_with_error(int code)
+void	exit_with_error(int code)
 {
 	if (code == C_FLAG)
 		fprintf(stderr, "ft_ping: bad number of packets to transmit.\n");
 	if (code == T_FLAG)
 		fprintf(stderr, "ft_ping: ttl out of range.\n");
 	else if (code == L_FLAG)
-		fprintf(stderr, "ft_ping: preload out of range\n");
+		fprintf(stderr, "ft_ping: preload out of range.\n");
 	else if (code == S_FLAG)
-		fprintf(stderr, "ft_ping: icmp data size out of range\n");
+		fprintf(stderr, "ft_ping: icmp data size out of range.\n");
 	else if (code == P_FLAG)
-		fprintf(stderr, "ft_ping: patterns must be specified as hex digits. (16 max)\n");
+		fprintf(stderr, "ft_ping: patterns must be specified as hex digits.\n");
 	else if (code == RECVMSG_ERROR)
 		fprintf(stderr, "ft_ping: recvmsg() error.\n");
 	else if (code == GETTIMEOFDAY_ERROR)
@@ -41,6 +41,6 @@ void exit_with_error(int code)
 	else if (code == SENDTO_ERROR)
 		fprintf(stderr, "ft_ping: sendto() error.\n");
 	else if (code == SETSOCKOPT_ERROR)
-		fprintf(stderr, "ft_ping: setsockopt() error\n");
+		fprintf(stderr, "ft_ping: setsockopt() error.\n");
 	exit(2);
 }

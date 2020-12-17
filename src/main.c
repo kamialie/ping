@@ -30,12 +30,13 @@ int		main(int argv, char *args[])
 		exit_with_error(SIGNAL_ERROR);
 	if (signal(SIGINT, sig_handler) == SIG_ERR)
 		exit_with_error(SIGNAL_ERROR);
-	print_execution_intro(args[argv - 1], info.dst_char, info.options.icmp_data_size);
+	print_execution_intro(args[argv - 1], info.dst_char,
+									info.options.icmp_data_size);
 	run_requests(&info);
 	return (0);
 }
 
-void 	sig_handler(int signo)
+void	sig_handler(int signo)
 {
 	if (signo == SIGALRM)
 		g_v = SEND_PACKET;
@@ -60,16 +61,17 @@ void	prepare_info(char *input, t_info *info)
 		info->options.ttl = DEFAULT_TTL;
 	if (!(info->options.options & S_FLAG))
 		info->options.icmp_data_size = DEFAULT_ICMP_DATA_SIZE;
-	info->icmp_size = (int) sizeof(t_icmp_hdr) + info->options.icmp_data_size;
+	info->icmp_size = (int)sizeof(t_icmp_hdr) + info->options.icmp_data_size;
 	info->address_info = get_address(input);
-	inet_ntop(AF_INET, &(info->address_info.sin_addr), info->dst_char, sizeof(info->dst_char));
+	inet_ntop(AF_INET, &(info->address_info.sin_addr),
+				info->dst_char, sizeof(info->dst_char));
 	info->icmp_packet = get_icmp_packet(info);
-	if ((info->rt_stats = (t_rt_stats *)malloc(sizeof(*info->rt_stats))) == NULL)
+	if ((info->rt_stats = malloc(sizeof(*info->rt_stats))) == NULL)
 		exit_with_error(MALLOC_ERROR);
 	ft_memset(info->rt_stats, 0, sizeof(*info->rt_stats));
 	if (gettimeofday(&info->rt_stats->tv_start, NULL) != 0)
 		exit_with_error(GETTIMEOFDAY_ERROR);
-	info->rt_stats->min = DEFAULT_TIMEOUT * 1000000; // max waiting time
+	info->rt_stats->min = DEFAULT_TIMEOUT * 1000000;
 }
 
 #pragma clang diagnostic push
@@ -81,13 +83,16 @@ void	prepare_info(char *input, t_info *info)
 ** and to EAGAIN when did not recieve any
 ** message by the end of timer
 */
+
 void	run_requests(t_info *info)
 {
 	t_msg_in	*msg;
 
 	msg = prepare_msg_object(info->icmp_size);
-	if (info->options.options & L_FLAG) {
-		while (info->options.preload-- > 0) {
+	if (info->options.options & L_FLAG)
+	{
+		while (info->options.preload-- > 0)
+		{
 			update_icmp_packet(info->rt_stats->pkg_sent + 1, info->icmp_size, info->icmp_packet);
 			info->rt_stats->pkg_sent += send_packet(&info->address_info, info);
 		}
@@ -109,14 +114,14 @@ void	run_requests(t_info *info)
 		else
 			verify_received_packet(msg, info->rt_stats, info);
 		if (g_v == EXIT)
-			return exit_program(msg, info);
+			return (exit_program(msg, info));
 		if (info->options.options & C_FLAG && info->rt_stats->pkg_sent == info->options.count)
-			return exit_program(msg, info);
+			return (exit_program(msg, info));
 	}
 }
 #pragma clang diagnostic pop
 
-t_msg_in *prepare_msg_object(int icmp_size)
+t_msg_in	*prepare_msg_object(int icmp_size)
 {
 	t_msg_in *msg;
 
