@@ -47,9 +47,11 @@ t_icmp_pack *get_icmp_packet(t_info *info)
 void update_icmp_packet(int seq, int icmp_size, t_icmp_pack *p)
 {
     p->header.seq = ft_htons(seq);
-    //TODO if no space
-    if (gettimeofday(&p->tv, NULL) != 0)
-		exit_with_error(GETTIMEOFDAY_ERROR);
+    if (icmp_size >= ICMP_MINIMUM_SIZE)
+	{
+		if (gettimeofday(&p->tv, NULL) != 0)
+			exit_with_error(GETTIMEOFDAY_ERROR);
+	}
     p->header.chksum = 0;
     p->header.chksum = compute_checksum((u_int16_t *)p, icmp_size);
 }
@@ -61,7 +63,6 @@ int	send_packet(struct sockaddr_in *sin, t_info *info)
 	return (1);
 }
 
-// TODO need ntohs
 void verify_received_packet(t_msg_in *msg, t_rt_stats *stats, t_info *info)
 {
     t_icmp_pack *icmp_in;

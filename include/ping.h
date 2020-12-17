@@ -14,7 +14,7 @@
 
 # define DEFAULT_ICMP_DATA_SIZE 56
 
-# define ICMP_MINIMUM_SIZE 16
+# define ICMP_MINIMUM_SIZE 24
 
 /*
 ** in seconds
@@ -93,14 +93,12 @@ typedef struct		s_msg_in {
 	struct sockaddr_in	rec_addr;
 	struct iovec		io;
 	struct msghdr		msghdr;
-	char				buf[512];
 }					t_msg_in;
 
 typedef struct		s_rt_stats {
 	long			min;
 	long			max;
 	long			sum;
-	long			sum2;
 	u_int16_t		pkg_sent;
 	u_int16_t		pkg_received;
 	u_int16_t		errors;
@@ -126,7 +124,6 @@ typedef struct		s_info {
 	pid_t				pid;
 	char				dst_char[INET_ADDRSTRLEN];
 	struct sockaddr_in	address_info;
-	// TODO decide if need to be malloced
 	t_rt_stats			*rt_stats;
 	t_icmp_pack			*icmp_packet;
 }					t_info;
@@ -164,9 +161,8 @@ int 				get_socket_in(void);
 void				print_usage(void);
 void				print_execution_intro(char *input, char *dst, int icmp_data_size);
 void				print_trip_stats(int ttl, double time, char *address, u_int16_t seq, int icmp_size);
-void				print_execution_summary(char *dst, t_rt_stats *stats);
+void				print_execution_summary(int icmp_size, char *dst, t_rt_stats *stats);
 void				print_memory(void *memory, unsigned int len);
-void				exit_with_error(int code);
 
 /*
 ** stats
@@ -182,6 +178,10 @@ u_int16_t			ft_htons(u_int16_t x);
 u_int16_t			ft_ntohs(u_int16_t x);
 u_int64_t			ft_htonll(u_int64_t x);
 
-void				exit_program(t_info *info);
+/*
+** exit
+*/
+void				exit_program(t_msg_in *msg, t_info *info);
+void				exit_with_error(int code);
 
 #endif

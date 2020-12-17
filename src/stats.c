@@ -27,7 +27,5 @@ double update_rt_stats(struct timeval *tv_in, t_rt_stats *stats)
     if (time_micro_s > stats->max)
         stats->max = time_micro_s;
     stats->sum += time_micro_s;
-    //TODO do I need this?
-    stats->sum2 += time_micro_s * time_micro_s;
     return (time_milli_s);
 }

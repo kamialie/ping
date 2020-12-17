@@ -3,16 +3,17 @@
 
 #include "ping.h"
 
-void exit_program(t_info *info)
+void exit_program(t_msg_in *msg, t_info *info)
 {
-	close(info->sfd_in);
-	close(info->sfd_out);
-	free(info->icmp_packet);
-	print_execution_summary(info->dst_char, info->rt_stats);
-	//TODO better check return statuses
+	print_execution_summary(info->icmp_size, info->dst_char, info->rt_stats);
 	if (info->rt_stats->pkg_sent != info->rt_stats->pkg_received)
 		exit(2);
-	exit(0);
+	close(info->sfd_in);
+	close(info->sfd_out);
+	free(msg->io.iov_base);
+	free(msg);
+	free(info->icmp_packet);
+	free(info->rt_stats);
 }
 
 void exit_with_error(int code)

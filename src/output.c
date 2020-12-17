@@ -23,7 +23,7 @@ void print_trip_stats(int ttl, double time, char *address, u_int16_t seq, int ic
 		printf("%d bytes from %s: icmp_seq=%d ttl=%d\n", icmp_size, address, seq, ttl);
 }
 
-void print_execution_summary(char *dst, t_rt_stats *stats)
+void print_execution_summary(int icmp_size, char *dst, t_rt_stats *stats)
 {
     double percent_loss;
     long total_time;
@@ -38,7 +38,7 @@ void print_execution_summary(char *dst, t_rt_stats *stats)
     {
         printf("%d packets transmitted, %d received, %.0f%% packet loss, time %#.5gms\n",
                stats->pkg_sent, stats->pkg_received, percent_loss, total_time / 1000.0);
-        if (percent_loss != 100)
+        if (percent_loss != 100 && icmp_size >= ICMP_MINIMUM_SIZE)
             printf("rtt min/avg/max/mdev = %.5g/%.5g/%.5g ms\n",
                    stats->min / 1000.0, stats->max / 1000.0, stats->sum / 1000.0 / stats->pkg_received);
     }
