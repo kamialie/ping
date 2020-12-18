@@ -7,11 +7,15 @@
 #include "ping.h"
 #include "lib.h"
 
+void ft_freeaddrinfo(struct addrinfo *addrinfo);
+
 struct sockaddr_in get_address(char *input)
 {
 	int				status;
 	struct addrinfo	hints;
 	struct addrinfo	*res;
+	struct addrinfo	*head;
+	struct sockaddr_in addr;
 
 	ft_memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;
@@ -24,17 +28,30 @@ struct sockaddr_in get_address(char *input)
 			fprintf(stderr, "ft_ping: getaddrinfo() error\n");
 		exit(2);
 	}
-	while (res != NULL)
+	head = res;
+    while (res != NULL)
     {
         if (res->ai_family == AF_INET)
 		{
-//        	freeaddrinfo()
-			return *(struct sockaddr_in *)res->ai_addr;
+        	addr = *(struct sockaddr_in *)res->ai_addr;
+			ft_freeaddrinfo(head);
+			return addr;
 		}
-        res++;
+		res = res->ai_next;
     }
 	fprintf(stderr, "ft_ping: getaddrinfo() suitable address not found\n");
     exit(2);
 }
 
-//TODO add freeaddrinfo (will do while checking with valgrind)
+void ft_freeaddrinfo(struct addrinfo *addrinfo)
+{
+	struct addrinfo *current;
+
+	while (addrinfo != NULL)
+	{
+		current = addrinfo;
+		addrinfo = addrinfo->ai_next;
+		free(current->ai_canonname);
+		free(current);
+	}
+}
