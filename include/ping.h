@@ -3,6 +3,7 @@
 
 # include <stdlib.h>
 # include <netinet/in.h>
+# include <netdb.h>
 
 /*
 ** global variable controlling the flow of the program
@@ -116,6 +117,17 @@ typedef struct		s_options
 	int			icmp_data_size;
 }					t_options;
 
+/*
+** trip stat (hello norm)
+*/
+typedef struct		s_ts
+{
+	int				ttl;
+	int				icmp_size;
+	int				seq;
+	double			time;
+}					t_ts;
+
 typedef struct		s_info {
 	t_options			options;
 	int					sfd_out;
@@ -128,17 +140,32 @@ typedef struct		s_info {
 	t_icmp_pack			*icmp_packet;
 }					t_info;
 
+void				run_requests(t_msg_in *msg, t_info *info);
+void				sig_handler(int signo);
+void				preload(t_info *info);
+
 /*
 ** options
 */
-
 void				options(int argv, char *args[], t_options *options);
+void				set_single_option(const char *str, t_options *options);
+void				set_options_with_arguments(char option, char *str,
+												t_options *options);
+void				set_p_option(char *str, t_options *options);
+int					get_value(char *str, int option, int max, int *options);
 
 /*
 ** address
 */
+void				get_address(char *input, t_info *info);
+void				extract_address(struct addrinfo *head, t_info *info);
+void				ft_freeaddrinfo(struct addrinfo *addrinfo);
 
-struct sockaddr_in	get_address(char *input);
+/*
+** prepare.c
+*/
+void				prepare_info(char *input, t_info *info);
+t_msg_in			*prepare_msg_object(int icmp_size);
 
 /*
 ** packet
@@ -146,12 +173,12 @@ struct sockaddr_in	get_address(char *input);
 t_icmp_pack			*get_icmp_packet(t_info *info);
 void				update_icmp_packet(int seq, int icmp_size, t_icmp_pack *p);
 int					send_packet(struct sockaddr_in *sin, t_info *info);
-void				verify_received_packet(t_msg_in *msg, t_rt_stats *stats, t_info *info);
+void				verify_received_packet(t_msg_in *msg,
+									t_rt_stats *stats, t_info *info);
 
 /*
 ** socket
 */
-
 int					get_socket_out(t_options *opt);
 int					get_socket_in(void);
 
@@ -159,12 +186,13 @@ int					get_socket_in(void);
 ** output
 */
 void				print_usage(void);
-void				print_execution_intro(char *input, char *dst,
-												int icmp_data_size);
-void				print_trip_stats(int ttl, double time, char *address,
-											u_int16_t seq, int icmp_size);
-void				print_execution_summary(int icmp_size, char *dst,
-													t_rt_stats *stats);
+void				print_execution_intro(char *input,
+											char *dst, int icmp_data_size);
+void				print_trip_stats(t_ts *trip_stats, char *address);
+void				print_error_message(char *address,
+										t_icmp_pack *icmp_in, t_info *info);
+void				print_execution_summary(int icmp_size,
+											char *dst, t_rt_stats *stats);
 void				print_memory(void *memory, unsigned int len);
 
 /*
@@ -179,7 +207,6 @@ double				update_rt_stats(struct timeval *tv_in, t_rt_stats *stats);
 u_int16_t			compute_checksum(u_int16_t *addr, int count);
 u_int16_t			ft_htons(u_int16_t x);
 u_int16_t			ft_ntohs(u_int16_t x);
-u_int64_t			ft_htonll(u_int64_t x);
 
 /*
 ** exit

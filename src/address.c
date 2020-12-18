@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <netinet/in.h> // protocol macros
+#include <netinet/in.h>
 
 #include <sys/socket.h>
 #include <netdb.h>
@@ -7,15 +7,11 @@
 #include "ping.h"
 #include "lib.h"
 
-void ft_freeaddrinfo(struct addrinfo *addrinfo);
-
-struct sockaddr_in get_address(char *input)
+void	get_address(char *input, t_info *info)
 {
 	int				status;
 	struct addrinfo	hints;
 	struct addrinfo	*res;
-	struct addrinfo	*head;
-	struct sockaddr_in addr;
 
 	ft_memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;
@@ -28,22 +24,29 @@ struct sockaddr_in get_address(char *input)
 			fprintf(stderr, "ft_ping: getaddrinfo() error\n");
 		exit(2);
 	}
-	head = res;
-    while (res != NULL)
-    {
-        if (res->ai_family == AF_INET)
-		{
-        	addr = *(struct sockaddr_in *)res->ai_addr;
-			ft_freeaddrinfo(head);
-			return addr;
-		}
-		res = res->ai_next;
-    }
-	fprintf(stderr, "ft_ping: getaddrinfo() suitable address not found\n");
-    exit(2);
+	extract_address(res, info);
 }
 
-void ft_freeaddrinfo(struct addrinfo *addrinfo)
+void	extract_address(struct addrinfo *head, t_info *info)
+{
+	struct addrinfo	*tmp;
+
+	tmp = head;
+	while (head != NULL)
+	{
+		if (head->ai_family == AF_INET)
+		{
+			info->address_info = *(struct sockaddr_in *)head->ai_addr;
+			ft_freeaddrinfo(tmp);
+			return ;
+		}
+		head = head->ai_next;
+	}
+	fprintf(stderr, "ft_ping: getaddrinfo() suitable address not found\n");
+	exit(2);
+}
+
+void	ft_freeaddrinfo(struct addrinfo *addrinfo)
 {
 	struct addrinfo *current;
 

@@ -7,8 +7,6 @@
 #include "ping.h"
 #include "lib.h"
 
-#include <stdio.h>
-
 static void	fill_icmp_pad(int patternlen, const unsigned char *pattern,
 											void *pad, int icmp_data_size)
 {
@@ -66,29 +64,30 @@ int			send_packet(struct sockaddr_in *sin, t_info *info)
 	return (1);
 }
 
-void		verify_received_packet(t_msg_in *msg, t_rt_stats *stats, t_info *info)
+void		verify_received_packet(t_msg_in *msg, t_rt_stats *stats,
+															t_info *info)
 {
 	t_icmp_pack	*icmp_in;
 	t_ip_hdr	*ip_hdr;
 	char		address[INET_ADDRSTRLEN];
+	t_ts		trip_stats;
 
 	ip_hdr = (t_ip_hdr *)msg->io.iov_base;
 	icmp_in = (t_icmp_pack *)((char *)msg->io.iov_base + sizeof(t_ip_hdr));
-	inet_ntop(msg->rec_addr.sin_family, (void*)&msg->rec_addr.sin_addr, address, INET6_ADDRSTRLEN);
+	inet_ntop(msg->rec_addr.sin_family, (void*)&msg->rec_addr.sin_addr,
+												address, INET6_ADDRSTRLEN);
+	trip_stats = (t_ts) {ip_hdr->iph_ttl, info->icmp_size,
+				icmp_in->header.seq, update_rt_stats(&icmp_in->tv, stats)};
 	if (icmp_in->header.type == ICMP_ECHO)
 		return ;
 	if (icmp_in->header.type != ICMP_ECHOREPLY)
 	{
-		stats->errors++;
-		if (info->options.options & V_FLAG)
-			printf("From %s: type = %d, code - %d\n",
-				address, icmp_in->header.type, icmp_in->header.code);
+		print_error_message(address, icmp_in, info);
 		return ;
 	}
-	if (compute_checksum((u_int16_t *)icmp_in, info->icmp_size))
-		return ;
-	if (info->pid != ft_ntohs(icmp_in->header.id))
+	if (compute_checksum((u_int16_t *)icmp_in, info->icmp_size) ||
+								info->pid != ft_ntohs(icmp_in->header.id))
 		return ;
 	stats->pkg_received++;
-	print_trip_stats(ip_hdr->iph_ttl, update_rt_stats(&icmp_in->tv, stats), address, ft_ntohs(icmp_in->header.seq), info->icmp_size);
+	print_trip_stats(&trip_stats, address);
 }

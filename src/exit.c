@@ -3,6 +3,13 @@
 
 #include "ping.h"
 
+void	print_usage(void)
+{
+	fprintf(stdout, "Usage: ping [-h] [-c count] [-t ttl] [-l] pattern "
+								"[-p] preload [-s] size destination\n");
+	exit(2);
+}
+
 void	exit_program(t_msg_in *msg, t_info *info)
 {
 	print_execution_summary(info->icmp_size, info->dst_char, info->rt_stats);

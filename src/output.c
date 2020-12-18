@@ -1,13 +1,6 @@
-#include <netinet/ip_icmp.h>
 #include <stdio.h>
 
 #include "ping.h"
-
-void	print_usage(void)
-{
-	fprintf(stdout, "Usage: ping [-h] [-c count] [-t ttl] destination\n");
-	exit(2);
-}
 
 void	print_execution_intro(char *input, char *dst, int icmp_data_size)
 {
@@ -16,19 +9,30 @@ void	print_execution_intro(char *input, char *dst, int icmp_data_size)
 			icmp_data_size + sizeof(t_icmp_hdr) + sizeof(t_ip_hdr));
 }
 
-void	print_trip_stats(int ttl, double time, char *address,
-								u_int16_t seq, int icmp_size)
+void	print_trip_stats(t_ts *trip_stats, char *address)
 {
+	int icmp_size;
+
+	icmp_size = trip_stats->icmp_size;
 	if (icmp_size >= ICMP_MINIMUM_SIZE)
 	{
 		printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%#.3g ms\n",
-									icmp_size, address, seq, ttl, time);
+									icmp_size, address, trip_stats->seq,
+									trip_stats->ttl, trip_stats->time);
 	}
 	else
 	{
 		printf("%d bytes from %s: icmp_seq=%d ttl=%d\n",
-							icmp_size, address, seq, ttl);
+				icmp_size, address, trip_stats->seq, trip_stats->ttl);
 	}
+}
+
+void	print_error_message(char *address, t_icmp_pack *icmp_in, t_info *info)
+{
+	info->rt_stats->errors++;
+	if (info->options.options & V_FLAG)
+		printf("From %s: type = %d, code - %d\n",
+				address, icmp_in->header.type, icmp_in->header.code);
 }
 
 void	print_execution_summary(int icmp_size, char *dst, t_rt_stats *stats)
