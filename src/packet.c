@@ -77,7 +77,7 @@ void		verify_received_packet(t_msg_in *msg, t_rt_stats *stats,
 	inet_ntop(msg->rec_addr.sin_family, (void*)&msg->rec_addr.sin_addr,
 												address, INET6_ADDRSTRLEN);
 	trip_stats = (t_ts) {ip_hdr->iph_ttl, info->icmp_size,
-				icmp_in->header.seq, update_rt_stats(&icmp_in->tv, stats)};
+			ft_ntohs(icmp_in->header.seq), update_rt_stats(&icmp_in->tv, stats)};
 	if (icmp_in->header.type == ICMP_ECHO)
 		return ;
 	if (icmp_in->header.type != ICMP_ECHOREPLY)
