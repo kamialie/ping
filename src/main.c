@@ -72,8 +72,6 @@ void	prepare_info(char *input, t_info *info)
 	info->rt_stats->min = DEFAULT_TIMEOUT * 1000000; // max waiting time
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
 /*
 ** recvmsg is set to non-blocking mode
 ** and will exit with errno set to EINTR
@@ -114,7 +112,6 @@ void	run_requests(t_info *info)
 			return exit_program(msg, info);
 	}
 }
-#pragma clang diagnostic pop
 
 t_msg_in *prepare_msg_object(int icmp_size)
 {

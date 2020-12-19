@@ -10,6 +10,10 @@
 
 #include <stdio.h>
 
+/*
+** icmp_data_size includes both time struct and padding
+** we want to fill in only padding
+*/
 static void fill_icmp_pad(int patternlen, unsigned char *pattern, void *pad, int icmp_data_size)
 {
 	int i;
@@ -21,6 +25,7 @@ static void fill_icmp_pad(int patternlen, unsigned char *pattern, void *pad, int
 		len++;
 	icmp_pad = pad;
 	i = 0;
+	icmp_data_size -= sizeof(struct timeval);
 	while (i < icmp_data_size)
 		*icmp_pad++ = pattern[i++ % len];
 }
