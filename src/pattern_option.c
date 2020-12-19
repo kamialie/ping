@@ -35,7 +35,7 @@ void			set_p_option(char *str, t_options *options)
 		if (str[i + 1] != '\0')
 		{
 			pattern[j++] = (unsigned char)((char_to_int(str[i]) << 4) +
-										   char_to_int(str[i + 1]));
+											char_to_int(str[i + 1]));
 		}
 		else
 			pattern[j++] = (unsigned char)(char_to_int(str[i]));
