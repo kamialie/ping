@@ -5,7 +5,7 @@
 
 void print_usage()
 {
-    fprintf(stdout, "Usage: ping [-h] [-c count] [-t ttl] destination\n");
+    fprintf(stdout, "Usage: ping [-h] [-c count] [-t ttl] [-l preload] [-p pattern] [-s size] destination\n");
     exit(2);
 }
 

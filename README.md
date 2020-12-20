@@ -2,19 +2,23 @@
 
 Recode of `ping` command line tool.
 
-## Available functions
+## Run
 
-+ [socket](https://man7.org/linux/man-pages/man2/socket.2.html)
-+ [setsocketopt](https://linux.die.net/man/3/setsockopt)
+Woks in Linux kernel > 3.14
 
-Must be performed in Linux VM (kernel > 3.14)
++ `docker-compose up -d`
++ `docker exec -ti ping_box bash`
++ `make`
++ `ping google.com`
 
-## Tasks
+## Features
 
-+ `-v -h` flags
-+ Manage simple IPv4 hostname/address as parameter
-+ manage FQDN without DNS resolution in the packet return
++ `-l preload` - send `preload` number of packets without waiting for response
++ `-c count` - stop sending packets after `count` times
++ `-s size` - specify the size of ICMP data section
++ `-p pattern` - fill in the remaining data section with `pattern`
++ `-t ttl` - change the default ttl field of IP packet
 
-## Info
+## About
 
-[to get started](https://www.geeksforgeeks.org/socket-programming-cc/)
+[Subject and description of the project](https://www.notion.so/ping-e1868da0cf884031a0ccd740ab89d4f7)
